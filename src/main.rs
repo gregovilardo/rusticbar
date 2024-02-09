@@ -47,12 +47,6 @@ fn load_css() {
     );
 }
 
-struct Workspace {
-    name: String,
-    focus: bool,
-    empty: bool,
-}
-
 fn build_ui(app: &Application) {
     // Create new window and present it
     let window = Window::new(app);
@@ -64,44 +58,6 @@ fn build_ui(app: &Application) {
     window.set_anchor(layer_shell::Edge::Right, true);
     window.auto_exclusive_zone_enable();
     window.present();
-
-    let mut conn = swayipc::Connection::new().expect("conn");
-    // let workspaces = conn.get_workspaces().expect("workspaces");
-    // for w in workspaces {
-    //     println!("{:?}", w);
-    // }
-
-    gio::spawn_blocking(move || {
-        let ws_event = conn
-            .subscribe([swayipc::EventType::Workspace])
-            .expect("ws event");
-
-        for e in ws_event {
-            match e.expect("event") {
-                swayipc::Event::Workspace(ev) => {
-                    println!("{:?}", ev.change);
-                    // let mut con2 = swayipc::Connection::new().expect("conn");
-                    // let workspaces = con2.get_workspaces().expect("workspaces");
-                    // for w in workspaces {
-                    //     println!("{:?}", w);
-                    // }
-                    println!("\n\n");
-                    let current_node = ev.current.expect("current event");
-                    println!("current node: {:?}", current_node.name.expect("name"));
-                    if let Some(old_node) = ev.old {
-                        println!("old node: {:?}", old_node.name.expect("name"));
-                    }
-                    // // the old node could die if it is empty
-                    // match old_node {
-                    //     Some(n) => println!("{:?} \n OLD FINISH", n),
-                    //     None => println!("el nodo murio"),
-                    // }
-                    // println!("{:?}\n CURRENT FINISH \n", current_node.nodes);
-                }
-                _ => println!("otro evento"),
-            }
-        }
-    });
 
     let tick = move || {
         let time = get_time();

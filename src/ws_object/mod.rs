@@ -7,21 +7,25 @@ glib::wrapper! {
     pub struct WsObject(ObjectSubclass<imp::WsObject>);
 }
 
+impl Default for WsObject {
+    fn default() -> Self {
+        Self::new(0, "None".to_string(), false)
+    }
+}
+
 impl WsObject {
-    pub fn new(num: u32, name: String, focus: bool, empty: bool) -> Self {
+    pub fn new(num: u8, name: String, focused: bool) -> Self {
         Object::builder()
             .property("num", num)
             .property("name", name)
-            .property("focus", focus)
-            .property("empty", empty)
+            .property("focused", focused)
             .build()
     }
 }
 
 #[derive(Default)]
 pub struct WsData {
-    pub num: u32,
+    pub num: u8,
     pub name: String,
-    pub focus: bool,
-    pub empty: bool,
+    pub focused: bool,
 }

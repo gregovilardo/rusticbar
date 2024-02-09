@@ -1,13 +1,21 @@
 use std::cell::RefCell;
+use std::sync::OnceLock;
 
 use glib::Binding;
+use gtk::glib::subclass::Signal;
+use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CheckButton, CompositeTemplate, Label};
+use gtk::subclass::prelude::*;
+use gtk::{glib, CompositeTemplate, Label};
 
 // Object holding the state
 #[derive(Default, CompositeTemplate)]
 #[template(resource = "/org/gtk_rs/rusticbar/workspace.ui")]
-pub struct WsWidget {}
+pub struct WsWidget {
+    #[template_child]
+    pub ws_label: TemplateChild<Label>,
+    pub bindings: RefCell<Vec<Binding>>,
+}
 
 // The central trait for subclassing a GObject
 #[glib::object_subclass]
@@ -27,7 +35,22 @@ impl ObjectSubclass for WsWidget {
 }
 
 // Trait shared by all GObjects
-impl ObjectImpl for WsWidget {}
+impl ObjectImpl for WsWidget {
+    // fn signals() -> &'static [Signal] {
+    //     static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
+    //     SIGNALS.get_or_init(|| {
+    //         vec![Signal::builder("init-workspace")
+    //             .param_types([i32::static_type()])
+    //             .build()]
+    //     })
+    // }
+    // fn constructed(&self) {
+    //     self.parent_constructed();
+    //     self.obj()
+    //         .bind_property("name", self.obj().as_ref(), "ws_label")
+    //         .build();
+    // }
+}
 
 // Trait shared by all widgets
 impl WidgetImpl for WsWidget {}

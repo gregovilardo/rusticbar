@@ -3,23 +3,27 @@ use std::cell::{Cell, RefCell};
 use glib::subclass::InitializingObject;
 use glib::Properties;
 use gtk::subclass::prelude::*;
-use gtk::Label;
+use gtk::{gio, ColumnView};
 use gtk::{glib, CompositeTemplate};
 use gtk::{prelude::*, Box};
+use gtk::{Label, ListView};
+
+use crate::ws_object::WsObject;
+use crate::ws_widget::WsWidget;
 
 // Object holding the state
 #[derive(Properties, CompositeTemplate, Default)]
 #[template(resource = "/org/gtk_rs/rusticbar/window.ui")]
 #[properties(wrapper_type = super::Window)]
 pub struct Window {
-    #[template_child(id = "workspaces_box")]
-    pub workspaces_box: TemplateChild<Box>,
     #[template_child(id = "time_label")]
     pub time_label: TemplateChild<Label>,
     #[property(get, set = Self::set_time_label)]
     pub time: RefCell<String>,
     // #[property(get, set = Self::set_workspaces)]
-    pub workspaces: Vec<String>,
+    #[template_child(id = "wss_list")]
+    pub wss_column: TemplateChild<ListView>,
+    pub workspaces: RefCell<Option<gio::ListStore>>,
 }
 
 // The central trait for subclassing a GObject
@@ -44,29 +48,16 @@ impl Window {
         self.time_label.set_text(&time.clone());
         *self.time.borrow_mut() = time;
     }
-    // fn set_workspaces(&self, )
 }
 
 #[glib::derived_properties]
 impl ObjectImpl for Window {
-    // fn signals() -> &'static [glib::subclass::Signal] {
-    //     static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
-    //     SIGNALS.get_or_init(|| {
-    //         vec![Signal::builder("clock-tick")
-    //             .param_types([i32::static_type()])
-    //             .build()]
-    //     })
-    // }
-
     fn constructed(&self) {
-        // Call "constructed" on parent
         self.parent_constructed();
         self.obj().setup_size();
-        // self.workspaces_box.append(&Label::new(Some("1")))
-        // self.obj()
-        //     .bind_property("time", self.obj().as_ref(), "time_label")
-        //     .sync_create()
-        //     .build();
+        self.obj().setup_workspaces();
+        self.obj().setup_sway_events();
+        self.obj().setup_factory();
     }
 }
 

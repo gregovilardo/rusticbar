@@ -23,6 +23,11 @@
         <child>
           <object class="GtkSeparator"></object>
         </child>
+        <child>
+          <object class="GtkListView" id="wss_list">
+            <property name="orientation">horizontal</property>
+          </object>
+        </child>
       </object>
     </child>
   </template>
