@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="MyGtkAppWindow" parent="GtkApplicationWindow">
+    <property name="decorated">false</property>
+    <property name="resizable">false</property>
+    <property name="hexpand">true</property>
+    <property name="hexpand_set">true</property>
+    <property name="modal">false</property>
+    <property name="focus_on_click">false</property>
+    <property name="opacity">1.0</property>
+    <property name="has_tooltip">false</property>
+    <!-- <property name="default-height">2</property> -->
+
+    <property name="title" translatable="yes">rusticbar</property>
+    <child>
+      <object class="GtkBox">
+        <property name="spacing">10</property>
+        <child>
+          <object class="GtkLabel" id="time_label">
+            <property name="label">11:11</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkSeparator"></object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>
+

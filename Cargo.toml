@@ -1,0 +1,19 @@
+[package]
+name = "rusticbar"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chrono = "0.4.33"
+# gdk4-x11 = "0.8.0"
+gtk = { version = "0.7.3", package = "gtk4", features = ["v4_8"] }
+gtk4-layer-shell = "0.2.0"
+swayipc = "3.0.2"
+
+[build-dependencies]
+glib-build-tools = "0.18.0"
+
+[build]
+incremental = false 
