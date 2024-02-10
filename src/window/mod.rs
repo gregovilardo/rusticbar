@@ -41,11 +41,12 @@ impl Window {
         let width = monitor.width();
         // let height = monitor.height() / 120;
         let height = 26;
-        let layout_manager = self.layout_manager();
-        println!("{:?}", layout_manager);
-        let childs = self.child();
-        println!("{:?}", childs);
-        self.set_has_tooltip(false);
+        let child = self.child().expect("child");
+        let layout_manager = child.layout_manager().expect("layout ");
+        println!("{:?}", child);
+        // layout_manager.allocate(&child, 100, height, -1);
+        // println!("{:?}", layout_manager.request_mode());
+        // self.set_has_tooltip(false);
         self.set_size_request(width, height);
         self.set_default_size(width, height);
     }
@@ -87,6 +88,19 @@ impl Window {
                 == num
             {
                 workspaces.remove(position);
+                break;
+            }
+            position += 1;
+        }
+    }
+
+    fn focus_workspace(&self, num: u8, focus_status: bool) {
+        let workspaces = self.workspaces();
+        let mut position = 0;
+        while let Some(item) = workspaces.item(position) {
+            let ws_object = item.downcast::<WsObject>().expect("has to be WsObject");
+            if ws_object.num() == num {
+                ws_object.set_focused(focus_status);
                 break;
             }
             position += 1;
@@ -182,36 +196,31 @@ impl Window {
             while let Ok(ev) = receiver.recv().await {
                 match ev.change {
                     swayipc::WorkspaceChange::Init => {
-                        let cn = ev.current.expect("event");
-                        let ws_object = WsObject::new(
-                            cn.num.expect("num") as u8,
-                            cn.name.expect("name"),
-                            cn.focused,
-                        );
-                        window.new_workspace(ws_object);
+                        if let Some(current_node)  = ev.current {
+                            let ws_object = WsObject::new(
+                                current_node.num.expect("num") as u8,
+                                current_node.name.expect("name"),
+                                current_node.focused,
+                            );
+                            window.new_workspace(ws_object);
+                        }
                     },
                     swayipc::WorkspaceChange::Focus => {
+                        if let Some(current_node)  = ev.current {
+                            // window.delete_workspace(current_node.num.expect("ws number") as u8);
+                            window.focus_workspace(current_node.num.expect("num") as u8, true);
+                        }
+                        if let Some(old_node)  = ev.old {
+                            window.focus_workspace(old_node.num.expect("num") as u8, false);
+                        }
                     },
                     swayipc::WorkspaceChange::Empty => {
-                        if let Some(ce)  = ev.current {
-                            window.delete_workspace(ce.num.expect("ws number") as u8);
-                            println!("current {}", ce.name.expect("name"));
+                        if let Some(current_node)  = ev.current {
+                            window.delete_workspace(current_node.num.expect("ws number") as u8);
                         }
-                        if let Some(ce)  = ev.old {
-                            println!("old {}", ce.name.expect("name"));
-                        }
-
-                        // let cn = ev.current.expect("event");
-                        // let ws_object = WsObject::new(
-                        //     cn.num.expect("num") as u8,
-                        //     cn.name.expect("name"),
-                        //     cn.focused,
-                        // );
-                        // window.new_workspace(ws_object);
                     },
                     _ => {},
                 }
-                // println!("{}", cn.name.expect("name on await"));
             }
         }));
     }

@@ -2,6 +2,14 @@ window {
   min-height: 26px;
 }
 
+label#ws_focused {
+  color: red;
+}
+
+/* label#ws_unfocused { */
+/*   color: grey; */
+/* } */
+
 /* task-row { */
 /*   background-color: @success_color; */
 /* } */

@@ -14,6 +14,8 @@
     <property name="title" translatable="yes">rusticbar</property>
     <child>
       <object class="GtkBox">
+        <property name="margin-start">20</property>
+        <property name="margin-end">20</property>
         <property name="spacing">10</property>
         <child>
           <object class="GtkLabel" id="time_label">

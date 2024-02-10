@@ -27,32 +27,40 @@ impl WsWidget {
 
     pub fn bind(&self, ws_object: &WsObject) {
         // Get state
-        let ws_label = self.imp().ws_label.get();
+        let ws_label = self.imp().ws_label.get(); // ws_label is in WsWidget
         let mut bindings = self.imp().bindings.borrow_mut();
 
-        // Bind `ws_object.name` to `ws_widget.ws_label.label`
         let ws_label_binding = ws_object
             .bind_property("name", &ws_label, "label")
             .sync_create()
             .build();
-        // Save binding
         bindings.push(ws_label_binding);
 
-        // Bind `task_object.completed` to `task_row.content_label.attributes`
         let ws_label_binding = ws_object
             .bind_property("focused", &ws_label, "attributes")
             .sync_create()
-            .transform_to(|_, active| {
+            .transform_to(|_, is_focused| {
                 let attribute_list = AttrList::new();
-                if active {
-                    // If "active" is true, content of the label will be strikethrough
-                    let attribute = AttrInt::new_strikethrough(true);
+                if is_focused {
+                    let attribute = AttrInt::new_weight(pango::Weight::Ultrabold);
                     attribute_list.insert(attribute);
                 }
                 Some(attribute_list.to_value())
             })
             .build();
-        // Save binding
+        bindings.push(ws_label_binding);
+
+        let ws_label_binding = ws_object
+            .bind_property("focused", &ws_label, "name")
+            .sync_create()
+            .transform_to(|_, is_focused| {
+                let mut widget_name = "ws_unfocused".to_string();
+                if is_focused {
+                    widget_name = "ws_focused".to_string();
+                }
+                Some(widget_name.to_value())
+            })
+            .build();
         bindings.push(ws_label_binding);
     }
 

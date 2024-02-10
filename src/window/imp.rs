@@ -62,7 +62,12 @@ impl ObjectImpl for Window {
 }
 
 // Trait shared by all widgets
-impl WidgetImpl for Window {}
+impl WidgetImpl for Window {
+    fn size_allocate(&self, width: i32, height: i32, baseline: i32) {
+        println!("new height {}", height);
+        self.parent_size_allocate(width, 26, baseline)
+    }
+}
 
 // Trait shared by all windows
 impl WindowImpl for Window {}
