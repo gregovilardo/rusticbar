@@ -1,5 +1,6 @@
 // mod fixed_size_layout_manager;
 mod custom_layout;
+mod vol_widget;
 mod window;
 mod ws_object;
 mod ws_widget;
@@ -58,6 +59,7 @@ fn build_ui(app: &Application) {
     window.set_anchor(layer_shell::Edge::Left, true);
     window.set_anchor(layer_shell::Edge::Right, true);
     window.auto_exclusive_zone_enable();
+
     window.present();
 
     let tick = move || {

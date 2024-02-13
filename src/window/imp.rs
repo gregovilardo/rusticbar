@@ -8,9 +8,6 @@ use gtk::{glib, CompositeTemplate};
 use gtk::{prelude::*, Box};
 use gtk::{Label, ListView};
 
-use crate::ws_object::WsObject;
-use crate::ws_widget::WsWidget;
-
 // Object holding the state
 #[derive(Properties, CompositeTemplate, Default)]
 #[template(resource = "/org/gtk_rs/rusticbar/window.ui")]
@@ -58,6 +55,7 @@ impl ObjectImpl for Window {
         self.obj().setup_workspaces();
         self.obj().setup_sway_events();
         self.obj().setup_factory();
+        self.obj().setup_volume();
     }
 }
 

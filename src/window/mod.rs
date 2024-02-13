@@ -10,14 +10,13 @@ use gtk::glib::ControlFlow;
 use gtk::prelude::DisplayExt;
 use gtk::subclass::prelude::ObjectSubclassIsExt;
 use gtk::{
-    gio, glib, Application, ConstraintLayout, FixedLayout, LayoutManager, ListItem, NoSelection,
-    SignalListItemFactory,
+    gio, glib, Application, Box, ConstraintLayout, FixedLayout, LayoutManager, ListItem,
+    NoSelection, SignalListItemFactory,
 };
 use gtk::{prelude::*, Label};
-use swayipc::WorkspaceChange;
 
-use crate::custom_layout::{self, CustomLayout};
-use crate::ws_object::{self, WsObject};
+use crate::vol_widget::VolWidget;
+use crate::ws_object::WsObject;
 use crate::ws_widget::WsWidget;
 
 glib::wrapper! {
@@ -43,50 +42,20 @@ impl Window {
             .expect("failed monitor")
             .geometry();
         let width = monitor.width();
-        // let height = monitor.height() / 120;
-        let height = 26;
-        let child_box = self.child().expect("child box");
-        let custom_layout = CustomLayout::new();
-        // println!(
-        //     "{:?}",
-        //     custom_layout.measure(&child_box, gtk::Orientation::Horizontal, 26)
-        // );
-
-        // let mut child = self.imp().wss_list.first_child().expect("child");
-        // println!("{:?}", child);
-
-        // child_box.set_layout_manager(Some(custom_layout));
-
-        // let mut child = self.imp().wss_list.first_child().expect("child");
-
-        // loop {
-        //     child.allocate(width, height, -1, None);
-        //     child.set_size_request(width, height);
-        //     if let Some(next_child) = child.next_sibling() {
-        //         child = next_child;
-        //     } else {
-        //         break;
-        //     }
-        // }
-
-        // let constraint_layout = ConstraintLayout::new();
-        // constraint_layout.
-
-        // child.set_layout_manager(Some(constraint_layout));
-        // let layout_manager = child.layout_manager().expect("layout ");
-        // layout_manager.allocate(
-        //     &child.first_child().expect("first_child"),
-        //     width,
-        //     height,
-        //     -1,
-        // );
-        // child.set_layout_manager(Some(layout_manager));
-        // println!("{:?}", child);
-        // layout_manager.allocate(&child, 100, height, -1);
-        // println!("{:?}", layout_manager);
-        // self.set_has_tooltip(false);
+        let height = monitor.height() / 41;
+        // let height = 26;
         self.set_size_request(width, height);
         self.set_default_size(width, height);
+    }
+
+    fn setup_volume(&self) {
+        let boxx = self
+            .first_child()
+            .expect("box")
+            .downcast::<Box>()
+            .expect("gtk box")
+            .append(&VolWidget::new());
+        println!("BOXX {:?}", boxx);
     }
 
     fn workspaces(&self) -> gio::ListStore {
@@ -267,10 +236,3 @@ impl Window {
 pub fn get_time() -> String {
     format!("{}", Local::now().format("%Y-%m-%d %H:%M:%S"))
 }
-
-// let mut conn = swayipc::Connection::new().expect("conn");
-// // let workspaces = conn.get_workspaces().expect("workspaces");
-// // for w in workspaces {
-// //     println!("{:?}", w);
-// // }
-//
