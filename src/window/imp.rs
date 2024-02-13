@@ -22,7 +22,7 @@ pub struct Window {
     pub time: RefCell<String>,
     // #[property(get, set = Self::set_workspaces)]
     #[template_child(id = "wss_list")]
-    pub wss_column: TemplateChild<ListView>,
+    pub wss_list: TemplateChild<ListView>,
     pub workspaces: RefCell<Option<gio::ListStore>>,
 }
 
@@ -62,12 +62,7 @@ impl ObjectImpl for Window {
 }
 
 // Trait shared by all widgets
-impl WidgetImpl for Window {
-    fn size_allocate(&self, width: i32, height: i32, baseline: i32) {
-        println!("new height {}", height);
-        self.parent_size_allocate(width, 26, baseline)
-    }
-}
+impl WidgetImpl for Window {}
 
 // Trait shared by all windows
 impl WindowImpl for Window {}

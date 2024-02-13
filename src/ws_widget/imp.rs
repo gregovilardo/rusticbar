@@ -1,12 +1,10 @@
 use std::cell::RefCell;
-use std::sync::OnceLock;
 
 use glib::Binding;
-use gtk::glib::subclass::Signal;
-use gtk::prelude::*;
-use gtk::subclass::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, Label};
+
+use crate::custom_layout::CustomLayout;
 
 // Object holding the state
 #[derive(Default, CompositeTemplate)]
@@ -27,6 +25,7 @@ impl ObjectSubclass for WsWidget {
 
     fn class_init(klass: &mut Self::Class) {
         klass.bind_template();
+        klass.set_layout_manager_type::<CustomLayout>();
     }
 
     fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -36,20 +35,9 @@ impl ObjectSubclass for WsWidget {
 
 // Trait shared by all GObjects
 impl ObjectImpl for WsWidget {
-    // fn signals() -> &'static [Signal] {
-    //     static SIGNALS: OnceLock<Vec<Signal>> = OnceLock::new();
-    //     SIGNALS.get_or_init(|| {
-    //         vec![Signal::builder("init-workspace")
-    //             .param_types([i32::static_type()])
-    //             .build()]
-    //     })
-    // }
-    // fn constructed(&self) {
-    //     self.parent_constructed();
-    //     self.obj()
-    //         .bind_property("name", self.obj().as_ref(), "ws_label")
-    //         .build();
-    // }
+    fn constructed(&self) {
+        self.parent_constructed();
+    }
 }
 
 // Trait shared by all widgets

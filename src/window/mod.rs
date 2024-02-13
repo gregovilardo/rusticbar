@@ -9,10 +9,14 @@ use gtk::gdk::{Display, Monitor};
 use gtk::glib::ControlFlow;
 use gtk::prelude::DisplayExt;
 use gtk::subclass::prelude::ObjectSubclassIsExt;
-use gtk::{gio, glib, Application, ListItem, NoSelection, SignalListItemFactory};
+use gtk::{
+    gio, glib, Application, ConstraintLayout, FixedLayout, LayoutManager, ListItem, NoSelection,
+    SignalListItemFactory,
+};
 use gtk::{prelude::*, Label};
 use swayipc::WorkspaceChange;
 
+use crate::custom_layout::{self, CustomLayout};
 use crate::ws_object::{self, WsObject};
 use crate::ws_widget::WsWidget;
 
@@ -41,11 +45,45 @@ impl Window {
         let width = monitor.width();
         // let height = monitor.height() / 120;
         let height = 26;
-        let child = self.child().expect("child");
-        let layout_manager = child.layout_manager().expect("layout ");
-        println!("{:?}", child);
+        let child_box = self.child().expect("child box");
+        let custom_layout = CustomLayout::new();
+        // println!(
+        //     "{:?}",
+        //     custom_layout.measure(&child_box, gtk::Orientation::Horizontal, 26)
+        // );
+
+        // let mut child = self.imp().wss_list.first_child().expect("child");
+        // println!("{:?}", child);
+
+        // child_box.set_layout_manager(Some(custom_layout));
+
+        // let mut child = self.imp().wss_list.first_child().expect("child");
+
+        // loop {
+        //     child.allocate(width, height, -1, None);
+        //     child.set_size_request(width, height);
+        //     if let Some(next_child) = child.next_sibling() {
+        //         child = next_child;
+        //     } else {
+        //         break;
+        //     }
+        // }
+
+        // let constraint_layout = ConstraintLayout::new();
+        // constraint_layout.
+
+        // child.set_layout_manager(Some(constraint_layout));
+        // let layout_manager = child.layout_manager().expect("layout ");
+        // layout_manager.allocate(
+        //     &child.first_child().expect("first_child"),
+        //     width,
+        //     height,
+        //     -1,
+        // );
+        // child.set_layout_manager(Some(layout_manager));
+        // println!("{:?}", child);
         // layout_manager.allocate(&child, 100, height, -1);
-        // println!("{:?}", layout_manager.request_mode());
+        // println!("{:?}", layout_manager);
         // self.set_has_tooltip(false);
         self.set_size_request(width, height);
         self.set_default_size(width, height);
@@ -122,7 +160,7 @@ impl Window {
         self.imp().workspaces.replace(Some(model));
 
         let selection_model = NoSelection::new(Some(self.workspaces()));
-        self.imp().wss_column.set_model(Some(&selection_model));
+        self.imp().wss_list.set_model(Some(&selection_model));
     }
 
     fn setup_factory(&self) {
@@ -173,7 +211,7 @@ impl Window {
         });
 
         // Set the factory of the list view
-        self.imp().wss_column.set_factory(Some(&factory));
+        self.imp().wss_list.set_factory(Some(&factory));
     }
 
     fn setup_sway_events(&self) {

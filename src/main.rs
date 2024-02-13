@@ -1,4 +1,5 @@
 // mod fixed_size_layout_manager;
+mod custom_layout;
 mod window;
 mod ws_object;
 mod ws_widget;
