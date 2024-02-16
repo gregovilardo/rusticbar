@@ -2,8 +2,8 @@ use std::cell::Cell;
 use std::cell::RefCell;
 
 use glib::Binding;
+use glib::ObjectExt;
 use glib::Properties;
-use glib::{clone, ObjectExt};
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, Label, LevelBar};
 
@@ -20,7 +20,6 @@ pub struct VolWidget {
     pub vol_label: TemplateChild<Label>,
     #[template_child]
     pub vol_level_bar: TemplateChild<LevelBar>,
-    pub bindings: RefCell<Vec<Binding>>,
 }
 
 // The central trait for subclassing a GObject
@@ -53,8 +52,7 @@ impl VolWidget {
 impl ObjectImpl for VolWidget {
     fn constructed(&self) {
         self.parent_constructed();
-        self.set_volume_level_bar(20.0);
-        self.set_volume_event();
+        self.obj().setup_volume_event();
     }
 }
 
