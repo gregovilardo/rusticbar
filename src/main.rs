@@ -1,11 +1,10 @@
 // mod fixed_size_layout_manager;
 mod custom_layout;
+mod network_widget;
 mod vol_widget;
 mod window;
 mod ws_object;
 mod ws_widget;
-
-use nl80211_ng::Nl80211;
 
 // use fixed_size_layout_manager::FixedSizeLayoutManager;
 use gtk::gdk::Display;
@@ -61,9 +60,6 @@ fn build_ui(app: &Application) {
     window.set_anchor(layer_shell::Edge::Left, true);
     window.set_anchor(layer_shell::Edge::Right, true);
     window.auto_exclusive_zone_enable();
-
-    let nl = Nl80211::new().expect("Nl80211");
-    println!("{:?}", nl.interfaces);
 
     window.present();
 

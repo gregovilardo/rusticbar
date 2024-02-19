@@ -8,6 +8,7 @@ use gtk::prelude::*;
 use gtk::subclass::prelude::ObjectSubclassIsExt;
 use gtk::{gio, glib, Application, Box, ListItem, NoSelection, SignalListItemFactory};
 
+use crate::network_widget::NetworkWidget;
 use crate::vol_widget::VolWidget;
 use crate::ws_object::WsObject;
 use crate::ws_widget::WsWidget;
@@ -42,13 +43,19 @@ impl Window {
     }
 
     fn setup_volume(&self) {
-        let boxx = self
-            .first_child()
+        self.first_child()
             .expect("box")
             .downcast::<Box>()
             .expect("gtk box")
             .append(&VolWidget::new());
-        println!("BOXX {:?}", boxx);
+    }
+
+    fn setup_network(&self) {
+        self.first_child()
+            .expect("box")
+            .downcast::<Box>()
+            .expect("gtk box")
+            .append(&NetworkWidget::new());
     }
 
     fn workspaces(&self) -> gio::ListStore {

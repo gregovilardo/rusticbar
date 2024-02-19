@@ -56,6 +56,7 @@ impl ObjectImpl for Window {
         self.obj().setup_sway_events();
         self.obj().setup_factory();
         self.obj().setup_volume();
+        self.obj().setup_network();
     }
 }
 
