@@ -1,19 +1,12 @@
 mod imp;
 
-use std::cell::Cell;
-use std::rc::Rc;
-
 use chrono::Local;
 use glib::{clone, Object};
 use gtk::gdk::{Display, Monitor};
-use gtk::glib::ControlFlow;
 use gtk::prelude::DisplayExt;
+use gtk::prelude::*;
 use gtk::subclass::prelude::ObjectSubclassIsExt;
-use gtk::{
-    gio, glib, Application, Box, ConstraintLayout, FixedLayout, LayoutManager, ListItem,
-    NoSelection, SignalListItemFactory,
-};
-use gtk::{prelude::*, Label};
+use gtk::{gio, glib, Application, Box, ListItem, NoSelection, SignalListItemFactory};
 
 use crate::vol_widget::VolWidget;
 use crate::ws_object::WsObject;

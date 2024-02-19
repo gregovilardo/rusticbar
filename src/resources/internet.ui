@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="InternetBox" parent="GtkBox">
+    <child>
+      <object class="GtkBox">
+        <child>
+          <object class="GtkLabel" id="wifi_name">
+            <property name="label">pepito</property>
+            <property name="margin-top">12</property>
+            <property name="margin-bottom">12</property>
+            <property name="margin-start">12</property>
+            <property name="margin-end">12</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="internet_icon">
+            <property name="label">󱛋</property>
+            <property name="margin-top">12</property>
+            <property name="margin-bottom">12</property>
+            <property name="margin-start">12</property>
+            <property name="margin-end">12</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

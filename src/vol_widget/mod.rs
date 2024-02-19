@@ -27,33 +27,55 @@ impl VolWidget {
         let mut descriptors = alsa::poll::Descriptors::get(&mixer).expect("descriptors");
 
         let elem = mixer.find_selem(&SelemId::new("Master", 0)).expect("mixer");
-        self.set_volume(get_vol(elem) as f64 / 655.36);
+        let status = get_status(elem);
+        self.set_volume(status.0);
+        self.set_mute(status.1);
 
         // The timeout argument specifies the number of milliseconds that
         // poll() should block waiting for a file descriptor to become
         // ready.  The call will block until either:
-        gio::spawn_blocking(move || loop {
-            let _res = alsa::poll::poll(&mut descriptors, i32::MAX);
-            if let Ok(r) = mixer.handle_events() {
-                if r == 1 {
-                    let elem = mixer.find_selem(&SelemId::new("Master", 0)).expect("mixer");
-                    let _res = sender.send_blocking(get_vol(elem));
+        gio::spawn_blocking(move || {
+            while let Ok(_res) = alsa::poll::poll(&mut descriptors, i32::MAX) {
+                if let Ok(r) = mixer.handle_events() {
+                    if r == 1 {
+                        let elem = mixer.find_selem(&SelemId::new("Master", 0)).expect("mixer");
+                        let _res = sender.send_blocking(get_status(elem));
+                    }
                 }
             }
         });
         glib::spawn_future_local(clone! (@weak self as vol_widget => async move {
-            while let Ok(vol) = receiver.recv().await {
-                // println!("Current volume alsa: {:?}", vol);
-                // println!("Current volume: {:?}", vol as f64/655.36);
-                vol_widget.set_volume(vol as f64/655.36);
+            while let Ok(status) = receiver.recv().await {
+                vol_widget.set_volume(status.0);
+                vol_widget.set_mute(status.1);
             }
         }));
     }
 }
 
-fn get_vol(selem: Selem) -> i64 {
+fn get_status(selem: Selem) -> (f64, bool) {
+    let mute;
     let volume = selem
         .get_playback_volume(SelemChannelId::FrontRight)
-        .unwrap();
-    return volume;
+        .unwrap() as f64
+        / selem.get_playback_volume_range().1 as f64
+        * 100.0;
+    if selem
+        .get_playback_switch(SelemChannelId::FrontRight)
+        .expect("mute")
+        == 1
+    {
+        mute = false;
+    } else {
+        mute = true;
+    }
+
+    println!(
+        "{:?}",
+        (
+            selem.get_playback_switch(SelemChannelId::FrontRight),
+            selem.can_playback()
+        )
+    );
+    return (volume, mute);
 }

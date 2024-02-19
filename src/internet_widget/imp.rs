@@ -11,9 +11,9 @@ use crate::custom_layout::CustomLayout;
 
 // Object holding the state
 #[derive(Properties, Default, CompositeTemplate)]
-#[template(resource = "/org/gtk_rs/rusticbar/volume.ui")]
-#[properties(wrapper_type = super::VolWidget)]
-pub struct VolWidget {
+#[template(resource = "/org/gtk_rs/rusticbar/internet.ui")]
+#[properties(wrapper_type = super::InternetWidget)]
+pub struct InternetWidget {
     #[property(get, set = Self::set_volume_level_bar)]
     pub volume: Cell<f64>,
     #[template_child]
@@ -27,10 +27,10 @@ pub struct VolWidget {
 
 // The central trait for subclassing a GObject
 #[glib::object_subclass]
-impl ObjectSubclass for VolWidget {
+impl ObjectSubclass for InternetWidget {
     // `NAME` needs to match `class` attribute of template
-    const NAME: &'static str = "VolumeBox";
-    type Type = super::VolWidget;
+    const NAME: &'static str = "InternetBox";
+    type Type = super::InternetWidget;
     type ParentType = gtk::Box;
 
     fn class_init(klass: &mut Self::Class) {
@@ -43,7 +43,7 @@ impl ObjectSubclass for VolWidget {
     }
 }
 
-impl VolWidget {
+impl InternetWidget {
     fn set_volume_level_bar(&self, volume: f64) {
         self.volume.set(volume);
         self.vol_level_bar.set_value(volume);
@@ -60,7 +60,7 @@ impl VolWidget {
 
 // Trait shared by all GObjects
 #[glib::derived_properties]
-impl ObjectImpl for VolWidget {
+impl ObjectImpl for InternetWidget {
     fn constructed(&self) {
         self.parent_constructed();
         self.obj().setup_volume_event();
@@ -68,7 +68,7 @@ impl ObjectImpl for VolWidget {
 }
 
 // Trait shared by all widgets
-impl WidgetImpl for VolWidget {}
+impl WidgetImpl for InternetWidget {}
 
 // Trait shared by all boxes
-impl BoxImpl for VolWidget {}
+impl BoxImpl for InternetWidget {}

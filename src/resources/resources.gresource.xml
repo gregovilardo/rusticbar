@@ -4,6 +4,7 @@
     <file compressed="true" preprocess="xml-stripblanks">window.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">workspace.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">volume.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">internet.ui</file>
     <!-- <file compressed="true" preprocess="xml-stripblanks">action_bar.ui</file> -->
     <file compressed="true">style.css</file>
   </gresource>
