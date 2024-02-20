@@ -13,10 +13,11 @@ chrono = "0.4.33"
 # gdk4-x11 = "0.8.0"
 gtk = { version = "0.7.3", package = "gtk4", features = ["v4_8"] }
 gtk4-layer-shell = "0.2.0"
-networkmanager = "0.4.1"
+# networkmanager = "0.4.1"
 dbus = "0.9"
 # pipewire = "0.8.0"
 swayipc = "3.0.2"
+passcod-networkmanager = "0.6.1"
 
 [build-dependencies]
 glib-build-tools = "0.18.0"

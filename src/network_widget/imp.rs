@@ -15,11 +15,11 @@ use crate::custom_layout::CustomLayout;
 #[properties(wrapper_type = super::NetworkWidget)]
 pub struct NetworkWidget {
     #[template_child(id = "network_name")]
-    pub network_name: TemplateChild<Label>,
+    pub network_name_label: TemplateChild<Label>,
     #[template_child(id = "icon")]
     pub icon: TemplateChild<Label>,
-    #[property(get, set = Self::set_label)]
-    pub network_conn: Cell<bool>,
+    #[property(get, set = Self::set_name)]
+    pub network_name: RefCell<String>,
 }
 
 // The central trait for subclassing a GObject
@@ -41,8 +41,9 @@ impl ObjectSubclass for NetworkWidget {
 }
 
 impl NetworkWidget {
-    fn set_label(&self, is_connected: bool) {
-        self.network_name.set_label("pepe");
+    fn set_name(&self, name: String) {
+        self.network_name.set(name.clone());
+        self.network_name_label.set_label(&name);
     }
 }
 

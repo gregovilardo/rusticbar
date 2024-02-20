@@ -69,13 +69,5 @@ fn get_status(selem: Selem) -> (f64, bool) {
     } else {
         mute = true;
     }
-
-    println!(
-        "{:?}",
-        (
-            selem.get_playback_switch(SelemChannelId::FrontRight),
-            selem.can_playback()
-        )
-    );
     return (volume, mute);
 }

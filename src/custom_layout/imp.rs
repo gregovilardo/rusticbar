@@ -1,6 +1,4 @@
-use std::cell::{Cell, RefCell};
-
-use gtk::{glib, prelude::*, subclass::prelude::*, BoxLayout, LayoutManager, Orientation};
+use gtk::{glib, prelude::*, subclass::prelude::*, Orientation};
 
 #[derive(Debug)]
 pub struct CustomLayout {}
@@ -37,15 +35,12 @@ impl LayoutManagerImpl for CustomLayout {
 
             if let Some(mut child) = widget.first_child() {
                 loop {
-                    println!("child {:?}", child);
                     if !child.should_layout() {
                         continue;
                     }
-
                     let (child_min, child_nat, _, _) = child.measure(orientation, -1);
                     min_size = min_size.max(child_min);
                     nat_size = nat_size.max(child_nat);
-                    println!("{:?}", (min_size, nat_size));
                     if let Some(next_child) = child.next_sibling() {
                         child = next_child;
                     } else {
@@ -53,7 +48,6 @@ impl LayoutManagerImpl for CustomLayout {
                     }
                 }
             }
-
             return (min_size, nat_size, -1, -1);
         } else {
             return (window_height, window_height, -1, -1);
@@ -67,7 +61,6 @@ impl LayoutManagerImpl for CustomLayout {
         height: i32,
         _baseline: i32,
     ) {
-        println!("width {:?}, height {:?}", width, height);
         let mut child = widget.first_child().unwrap();
         loop {
             if !child.should_layout() {

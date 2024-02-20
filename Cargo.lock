@@ -692,17 +692,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "networkmanager"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36c7a94a505f4bdf5c605ade8a131f7487bbb80170ac27051ba569aa21598cd8"
-dependencies = [
- "dbus",
- "num-derive",
- "num-traits",
-]
-
-[[package]]
 name = "nix"
 version = "0.26.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -769,6 +758,18 @@ name = "parking"
 version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bb813b8af86854136c6922af0598d719255ecb2179515e6e7730d468f05c9cae"
+
+[[package]]
+name = "passcod-networkmanager"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "231a0c3b8e4a537227ce77d8cf44ef1c7804d5337276c67cc0b46074e15c15c4"
+dependencies = [
+ "dbus",
+ "num-derive",
+ "num-traits",
+ "thiserror",
+]
 
 [[package]]
 name = "pin-project-lite"
@@ -870,7 +871,7 @@ dependencies = [
  "glib-build-tools",
  "gtk4",
  "gtk4-layer-shell",
- "networkmanager",
+ "passcod-networkmanager",
  "swayipc",
 ]
 
