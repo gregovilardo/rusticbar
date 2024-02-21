@@ -52,7 +52,7 @@ impl NetworkWidget {
 impl ObjectImpl for NetworkWidget {
     fn constructed(&self) {
         self.parent_constructed();
-        self.obj().setup_connections();
+        self.obj().setup_network();
     }
 }
 

@@ -1,6 +1,7 @@
 // mod fixed_size_layout_manager;
 mod custom_layout;
 mod network_widget;
+mod networkmanager;
 mod vol_widget;
 mod window;
 mod ws_object;
