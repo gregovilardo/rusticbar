@@ -1,13 +1,36 @@
 use std::cell::Cell;
 use std::cell::RefCell;
 
-use glib::Binding;
 use glib::ObjectExt;
 use glib::Properties;
+use gtk::pango::AttrList;
 use gtk::subclass::prelude::*;
 use gtk::{glib, CompositeTemplate, Label};
 
 use crate::custom_layout::CustomLayout;
+
+#[derive(glib::Enum, Clone, Copy, Debug, PartialEq, Default)]
+#[enum_type(name = "ConnectionType")]
+pub enum ConnectionType {
+    #[default]
+    None,
+    Wireless,
+    Wired,
+}
+
+#[derive(glib::Enum, Clone, Copy, Debug, PartialEq, Default)]
+#[enum_type(name = "NMState")]
+pub enum NMState {
+    #[default]
+    Unknown,
+    Asleep,
+    Disconnected,
+    Disconnecting,
+    Connecting,
+    ConnectedLocal,
+    ConnectedSite,
+    ConnectedGlobal,
+}
 
 // Object holding the state
 #[derive(Properties, Default, CompositeTemplate)]
@@ -20,6 +43,8 @@ pub struct NetworkWidget {
     pub icon: TemplateChild<Label>,
     #[property(get, set = Self::set_name)]
     pub network_name: RefCell<String>,
+    pub state: Cell<NMState>,
+    pub connection: Cell<ConnectionType>,
 }
 
 // The central trait for subclassing a GObject
@@ -44,6 +69,33 @@ impl NetworkWidget {
     fn set_name(&self, name: String) {
         self.network_name.set(name.clone());
         self.network_name_label.set_label(&name);
+    }
+    pub fn set_icon(&self) {
+        match self.state.get() {
+            NMState::ConnectedGlobal => {
+                self.network_name_label.set_attributes(Some(
+                    &AttrList::from_string("0 -1 weight 700").expect("att"),
+                ));
+                match self.connection.get() {
+                    ConnectionType::Wireless => {
+                        self.icon.set_label("󰤥");
+                    }
+                    ConnectionType::Wired => {
+                        self.icon.set_label("󰈀");
+                    }
+                    ConnectionType::None => {
+                        println!("Something went wrong");
+                    }
+                }
+            }
+            NMState::Disconnected => {
+                self.set_name("".to_string());
+                self.icon.set_label("󰤮");
+            }
+            _ => {
+                self.icon.set_label("󰤦");
+            }
+        }
     }
 }
 

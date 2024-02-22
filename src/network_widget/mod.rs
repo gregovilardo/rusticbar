@@ -1,16 +1,20 @@
 mod imp;
 
+use dbus::arg::RefArg;
 use dbus::blocking::Connection;
 use dbus::Message;
 use glib::{clone, Object};
+use gtk::subclass::prelude::ObjectSubclassIsExt;
 use gtk::{gio, glib};
 use passcod_networkmanager::devices::{Any, Device, Wired, Wireless};
 use passcod_networkmanager::{Error, NetworkManager};
 use std::time::Duration;
 
-use crate::networkmanager::OrgFreedesktopNetworkManagerStateChanged;
+use crate::networkmanager::{
+    OrgFreedesktopDBusPropertiesPropertiesChanged, OrgFreedesktopNetworkManager,
+};
 
-const NM_DEVICE_STATE_ACTIVATED: i32 = 100;
+use self::imp::{ConnectionType, NMState};
 
 glib::wrapper! {
     pub struct NetworkWidget(ObjectSubclass<imp::NetworkWidget>)
@@ -29,12 +33,23 @@ impl NetworkWidget {
         Object::builder().build()
     }
     fn setup_network(&self) {
+        let nm = NetworkManager::new().expect("network");
         let (send, recv) = async_channel::unbounded();
 
-        gio::spawn_blocking(clone!(@strong send => move || {
-            let dbus_conn = Connection::new_system().expect("dbus connection");
+        let dbus_conn = Connection::new_system().expect("dbus connection");
+        let p = dbus_conn.with_proxy(
+            "org.freedesktop.NetworkManager",
+            "/org/freedesktop/NetworkManager",
+            Duration::new(5, 0),
+        );
 
-            // Make a "ConnPath" struct that just contains a Connection, a destination and a path.
+        if let Ok(state) = p.state() {
+            self.imp().state.set(translate_nmstate(state));
+        }
+        self.update_network(nm.clone());
+        self.imp().set_icon();
+
+        gio::spawn_blocking(clone!(@strong send => move || {
             let p = dbus_conn.with_proxy(
                 "org.freedesktop.NetworkManager",
                 "/org/freedesktop/NetworkManager",
@@ -42,9 +57,14 @@ impl NetworkWidget {
             );
 
             let _res = p.match_signal( move
-                |state: OrgFreedesktopNetworkManagerStateChanged, _: &Connection, _: &Message| {
-                    // println!("sig {:?}", h);
-                    let _res = send.send_blocking(state);
+                |state: OrgFreedesktopDBusPropertiesPropertiesChanged, _: &Connection, _: &Message| {
+                    // so ugly
+                    if let Some(state_box) =  state.changed_properties.get_key_value("State") {
+                        if let Some(state) = state_box.1.0.as_u64() {
+                            let _res = send.send_blocking(Some(state as u32));
+                        }
+                    }
+                    let _res = send.send_blocking(None);
                     true
                 },
             );
@@ -56,42 +76,61 @@ impl NetworkWidget {
             }
         }));
 
-        glib::spawn_future_local(clone!(@weak self as nw_widget => async move {
+        glib::spawn_future_local(clone!(@weak self as nm_widget => async move {
             while let Ok(res) = recv.recv().await {
-                println!("{:?}", res);
-                let nm = NetworkManager::new().expect("network");
-                let mut eth_conn = false;
-
-                for dev in nm.get_all_devices().expect("er") {
-                    match dev {
-                        Device::Ethernet(x) => {
-                            if let Ok(conn) = x.active_connection() {
-                                if let Ok(_state) = conn.state() {
-                                    nw_widget.set_network_name(x.ip_interface().expect("ip interface"));
-                                    eth_conn = true;
-                                }
-                            } else {
-                                println!("active connection error");
-                            }
-                        }
-                        Device::WiFi(x) => {
-                            if !eth_conn {
-                                if let Ok(ap) = x.active_access_point() {
-                                    nw_widget.set_network_name(ap.ssid().expect("ssid"));
-                                } else {
-                                    nw_widget.set_network_name("NO CONNECTION")
-                                }
-                            }
-                        }
-                        _ => {}
-                    }
+                // when disconnecting ethernet with wifi activated no change on state happen
+                if let Some(state) = res {
+                    println!("{:?}", state);
+                    nm_widget.imp().state.set(translate_nmstate(state));
                 }
+                nm_widget.update_network(nm.clone());
+                nm_widget.imp().set_icon();
             }
         }));
     }
-    // fn setup_network(&self) {
-    //     self.update_network();
-    // }
+    fn update_network(&self, nm: NetworkManager) {
+        for dev in nm.get_all_devices().expect("er") {
+            match dev {
+                Device::Ethernet(x) => {
+                    if let Ok(conn) = x.active_connection() {
+                        if let Ok(_state) = conn.state() {
+                            self.imp().connection.set(ConnectionType::Wired);
+                            self.set_network_name(x.ip_interface().expect("ip interface"));
+                            return;
+                        }
+                    }
+                    self.imp().connection.set(ConnectionType::None);
+                }
+                Device::WiFi(x) => {
+                    if self.imp().connection.get() != ConnectionType::Wired {
+                        if let Ok(ap) = x.active_access_point() {
+                            if let Ok(ssid) = ap.ssid() {
+                                self.imp().connection.set(ConnectionType::Wireless);
+                                self.set_network_name(ssid);
+                                return;
+                            }
+                        }
+                        self.imp().connection.set(ConnectionType::None);
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+}
+
+pub fn translate_nmstate(state: u32) -> NMState {
+    match state {
+        0 => NMState::Unknown,
+        10 => NMState::Asleep,
+        20 => NMState::Disconnected,
+        30 => NMState::Disconnecting,
+        40 => NMState::Connecting,
+        50 => NMState::ConnectedLocal,
+        60 => NMState::ConnectedSite,
+        70 => NMState::ConnectedGlobal,
+        _ => NMState::Unknown,
+    }
 }
 
 // println!("Is autoconnected: {:?}", x.autoconnect().expect("er"));
