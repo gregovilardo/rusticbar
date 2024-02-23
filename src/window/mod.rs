@@ -4,11 +4,12 @@ use chrono::Local;
 use glib::{clone, Object};
 use gtk::gdk::{Display, Monitor};
 use gtk::prelude::DisplayExt;
-use gtk::prelude::*;
 use gtk::subclass::prelude::ObjectSubclassIsExt;
 use gtk::{gio, glib, Application, Box, ListItem, NoSelection, SignalListItemFactory};
+use gtk::{prelude::*, Label};
 
 use crate::network_widget::NetworkWidget;
+use crate::systeminfo::SystemInfoWidget;
 use crate::vol_widget::VolWidget;
 use crate::ws_object::WsObject;
 use crate::ws_widget::WsWidget;
@@ -56,6 +57,20 @@ impl Window {
             .downcast::<Box>()
             .expect("gtk box")
             .append(&NetworkWidget::new());
+    }
+
+    fn setup_systeminfo(&self) {
+        self.first_child()
+            .expect("box")
+            .downcast::<Box>()
+            .expect("gtk box")
+            .append(&SystemInfoWidget::new());
+    }
+
+    fn setup_focused(&self) {
+        self.imp()
+            .focused_label
+            .set_text(&self.imp().focused_app.borrow());
     }
 
     fn workspaces(&self) -> gio::ListStore {
@@ -189,45 +204,88 @@ impl Window {
 
         gio::spawn_blocking(move || {
             let ws_event = conn
-                .subscribe([swayipc::EventType::Workspace])
+                .subscribe([swayipc::EventType::Workspace, swayipc::EventType::Window])
                 .expect("ws event");
 
             for e in ws_event {
-                if let swayipc::Event::Workspace(ev) = e.expect("event") {
-                    let _s = sender.send_blocking(ev);
-                }
+                let _s = sender.send_blocking(e);
+                // if let swayipc::Event::Workspace(ev) = e.expect("event") {
+                //     let _s = sender.send_blocking(ev);
+                // }
+                // if let swayipc::Event::Window(ev) = e.expect("event") {
+                //     let _s = sender.send_blocking(ev);
+                // }
             }
         });
 
         glib::spawn_future_local(clone! (@weak self as window => async move {
             while let Ok(ev) = receiver.recv().await {
-                match ev.change {
-                    swayipc::WorkspaceChange::Init => {
-                        if let Some(current_node)  = ev.current {
-                            let ws_object = WsObject::new(
-                                current_node.num.expect("num") as u8,
-                                current_node.name.expect("name"),
-                                current_node.focused,
-                            );
-                            window.new_workspace(ws_object);
+                        // println!("{:#?}", ev);
+                match ev {
+                    Ok(swayipc::Event::Workspace(ev)) => {
+                        match ev.change {
+                            swayipc::WorkspaceChange::Init => {
+                                if let Some(current_node)  = ev.current {
+                                    let ws_object = WsObject::new(
+                                        current_node.num.expect("num") as u8,
+                                        current_node.name.expect("name"),
+                                        current_node.focused,
+                                    );
+                                    window.new_workspace(ws_object);
+                                    *window.imp().focused_app.borrow_mut() = "".to_string();
+                                    window.setup_focused();
+
+                                }
+                            },
+                            swayipc::WorkspaceChange::Focus => {
+                                if let Some(current_node)  = ev.current {
+                                    // window.delete_workspace(current_node.num.expect("ws number") as u8);
+                                    window.focus_workspace(current_node.num.expect("num") as u8, true);
+                                }
+                                if let Some(old_node)  = ev.old {
+                                    window.focus_workspace(old_node.num.expect("num") as u8, false);
+                                }
+                            },
+                            swayipc::WorkspaceChange::Empty => {
+                                if let Some(current_node)  = ev.current {
+                                    window.delete_workspace(current_node.num.expect("ws number") as u8);
+                                }
+                            },
+                            _ => {},
                         }
                     },
-                    swayipc::WorkspaceChange::Focus => {
-                        if let Some(current_node)  = ev.current {
-                            // window.delete_workspace(current_node.num.expect("ws number") as u8);
-                            window.focus_workspace(current_node.num.expect("num") as u8, true);
+                    Ok(swayipc::Event::Window(ev)) => {
+
+                        if ev.change == swayipc::WindowChange::Close {
+                                *window.imp().focused_app.borrow_mut() = "".to_string();
+                                window.setup_focused();
                         }
-                        if let Some(old_node)  = ev.old {
-                            window.focus_workspace(old_node.num.expect("num") as u8, false);
+                        if ev.change == swayipc::WindowChange::Focus {
+                            if ev.container.focused {
+                                if let Some(app_name) = ev.container.name {
+                                    *window.imp().focused_app.borrow_mut() = app_name;
+                                    window.setup_focused();
+                                }
+
+
+                            }
                         }
-                    },
-                    swayipc::WorkspaceChange::Empty => {
-                        if let Some(current_node)  = ev.current {
-                            window.delete_workspace(current_node.num.expect("ws number") as u8);
-                        }
+                // if let Some(current_node)  = ev.current.clone() {
+                //     if let Some(focused) = current_node.find_focused(|node:&swayipc::Node| -> bool {
+                //         node.focused
+                //     }) {
+                //         if let Some(focused_name) = focused.name {
+                //             println!("{}", focused_name);
+                //             *window.imp().focused_app.borrow_mut() = focused_name;
+                //             window.setup_focused();
+                //         }
+                //     }
+                // }
+
                     },
                     _ => {},
                 }
+
             }
         }));
     }

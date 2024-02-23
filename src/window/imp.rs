@@ -21,6 +21,11 @@ pub struct Window {
     #[template_child(id = "wss_list")]
     pub wss_list: TemplateChild<ListView>,
     pub workspaces: RefCell<Option<gio::ListStore>>,
+    pub focused_app: RefCell<String>,
+    #[template_child(id = "focused_box")]
+    pub focused_box: TemplateChild<Box>,
+    #[template_child(id = "focused_label")]
+    pub focused_label: TemplateChild<Label>,
 }
 
 // The central trait for subclassing a GObject
@@ -57,6 +62,8 @@ impl ObjectImpl for Window {
         self.obj().setup_factory();
         self.obj().setup_volume();
         self.obj().setup_network();
+        self.obj().setup_focused();
+        self.obj().setup_systeminfo();
     }
 }
 

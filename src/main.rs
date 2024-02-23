@@ -2,6 +2,7 @@
 mod custom_layout;
 mod network_widget;
 mod networkmanager;
+mod systeminfo;
 mod vol_widget;
 mod window;
 mod ws_object;
@@ -64,7 +65,7 @@ fn build_ui(app: &Application) {
 
     window.present();
 
-    let tick = move || {
+    let tick_time = move || {
         let time = get_time();
         window.set_time(time);
         // we could return glib::ControlFlow::Break to stop our clock after this tick
@@ -72,5 +73,5 @@ fn build_ui(app: &Application) {
     };
 
     // executes the closure once every second
-    glib::timeout_add_seconds_local(1, tick);
+    glib::timeout_add_seconds_local(1, tick_time);
 }

@@ -18,6 +18,7 @@ dbus = "0.9"
 # pipewire = "0.8.0"
 swayipc = "3.0.2"
 passcod-networkmanager = "0.6.1"
+systemstat = "0.2.3"
 
 [build-dependencies]
 glib-build-tools = "0.18.0"
