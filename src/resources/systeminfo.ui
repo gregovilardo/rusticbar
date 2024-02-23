@@ -1,63 +1,94 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <template class="SystemInfoBox" parent="GtkBox">
+
     <child>
-      <object class="GtkBox">
-        <child>
-          <object class="GtkLabel" id="disc">
-            <property name="label"></property>
-            <property name="margin-top">12</property>
-            <property name="margin-bottom">12</property>
-            <property name="margin-start">12</property>
-            <property name="margin-end">12</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkLabel" id="ram">
-            <property name="label"></property>
-            <property name="margin-top">12</property>
-            <property name="margin-bottom">12</property>
-            <property name="margin-start">12</property>
-            <property name="margin-end">12</property>
-          </object>
-        </child>
-        <!-- <child> -->
-        <!--   <object class="GtkLabel" id="swap"> -->
-        <!--     <property name="label"></property> -->
-        <!--     <property name="margin-top">12</property> -->
-        <!--     <property name="margin-bottom">12</property> -->
-        <!--     <property name="margin-start">12</property> -->
-        <!--     <property name="margin-end">12</property> -->
-        <!--   </object> -->
-        <!-- </child> -->
-        <child>
-          <object class="GtkLabel" id="cpu_load">
-            <property name="label"></property>
-            <property name="margin-top">12</property>
-            <property name="margin-bottom">12</property>
-            <property name="margin-start">12</property>
-            <property name="margin-end">12</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkLabel" id="cpu_temp">
-            <property name="label"></property>
-            <property name="margin-top">12</property>
-            <property name="margin-bottom">12</property>
-            <property name="margin-start">12</property>
-            <property name="margin-end">12</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkLabel" id="uptime">
-            <property name="label"></property>
-            <property name="margin-top">12</property>
-            <property name="margin-bottom">12</property>
-            <property name="margin-start">12</property>
-            <property name="margin-end">12</property>
-          </object>
-        </child>
+      <object class="GtkMenuButton" id="button">
+        <property name="label">Pressme!</property>
       </object>
     </child>
+    <!-- <child> -->
+    <!--   <object class="GtkPopover" id="popover"> -->
+    <!--     <child> -->
+    <!--       <object class="GtkLabel"> -->
+    <!--         <property name="label">hola</property> -->
+    <!--       </object> -->
+    <!--     </child> -->
+    <!--   </object> -->
+    <!-- </child> -->
+    <!-- <child> -->
+    <!--   <object class="GtkMenuButton" id="menu_button"> -->
+    <!--     <property name="direction">down</property> -->
+    <!---->
+    <!--     <child> -->
+    <!--       <object class="GtkPopover" id="popover"> -->
+    <!---->
+    <!--         <child> -->
+    <!--           <object class="GtkBox"> -->
+    <!--             <property name="orientation">vertical</property> -->
+    <!---->
+    <!--             <child> -->
+    <!--               <object class="GtkLabel" id="disc"> -->
+    <!--                 <property name="label"></property> -->
+    <!--                 <property name="margin-top">12</property> -->
+    <!--                 <property name="margin-bottom">12</property> -->
+    <!--                 <property name="margin-start">12</property> -->
+    <!--                 <property name="margin-end">12</property> -->
+    <!--               </object> -->
+    <!--             </child> -->
+    <!--             <child> -->
+    <!--               <object class="GtkLabel" id="ram"> -->
+    <!--                 <property name="label"></property> -->
+    <!--                 <property name="margin-top">12</property> -->
+    <!--                 <property name="margin-bottom">12</property> -->
+    <!--                 <property name="margin-start">12</property> -->
+    <!--                 <property name="margin-end">12</property> -->
+    <!--               </object> -->
+    <!--             </child> -->
+    <!-- <child> -->
+    <!--   <object class="GtkLabel" id="swap"> -->
+    <!--     <property name="label"></property> -->
+    <!--     <property name="margin-top">12</property> -->
+    <!--     <property name="margin-bottom">12</property> -->
+    <!--     <property name="margin-start">12</property> -->
+    <!--     <property name="margin-end">12</property> -->
+    <!--   </object> -->
+    <!-- </child> -->
+    <!--             <child> -->
+    <!--               <object class="GtkLabel" id="cpu_load"> -->
+    <!--                 <property name="label"></property> -->
+    <!--                 <property name="margin-top">12</property> -->
+    <!--                 <property name="margin-bottom">12</property> -->
+    <!--                 <property name="margin-start">12</property> -->
+    <!--                 <property name="margin-end">12</property> -->
+    <!--               </object> -->
+    <!--             </child> -->
+    <!--             <child> -->
+    <!--               <object class="GtkLabel" id="cpu_temp"> -->
+    <!--                 <property name="label"></property> -->
+    <!--                 <property name="margin-top">12</property> -->
+    <!--                 <property name="margin-bottom">12</property> -->
+    <!--                 <property name="margin-start">12</property> -->
+    <!--                 <property name="margin-end">12</property> -->
+    <!--               </object> -->
+    <!--             </child> -->
+    <!--             <child> -->
+    <!--               <object class="GtkLabel" id="uptime"> -->
+    <!--                 <property name="label"></property> -->
+    <!--                 <property name="margin-top">12</property> -->
+    <!--                 <property name="margin-bottom">12</property> -->
+    <!--                 <property name="margin-start">12</property> -->
+    <!--                 <property name="margin-end">12</property> -->
+    <!--               </object> -->
+    <!--             </child> -->
+    <!---->
+    <!--           </object> -->
+    <!--         </child> -->
+    <!---->
+    <!--       </object> -->
+    <!--     </child> -->
+    <!---->
+    <!-- </object> -->
+    <!-- </child> -->
   </template>
 </interface>

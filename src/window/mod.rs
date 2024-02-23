@@ -260,7 +260,7 @@ impl Window {
                                 *window.imp().focused_app.borrow_mut() = "".to_string();
                                 window.setup_focused();
                         }
-                        if ev.change == swayipc::WindowChange::Focus {
+                        if ev.change == swayipc::WindowChange::Focus || ev.change == swayipc::WindowChange::Title { // Also Title event
                             if ev.container.focused {
                                 if let Some(app_name) = ev.container.name {
                                     *window.imp().focused_app.borrow_mut() = app_name;

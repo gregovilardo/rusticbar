@@ -1,7 +1,13 @@
 mod imp;
 
 use glib::Object;
-use gtk::{glib, subclass::prelude::ObjectSubclassIsExt};
+use gtk::{
+    gio,
+    glib::{self, clone},
+    prelude::*,
+    subclass::prelude::ObjectSubclassIsExt,
+    Popover, ToggleButton,
+};
 use std::thread;
 use std::time::Duration;
 use systemstat::{saturating_sub_bytes, Platform, System};
@@ -18,96 +24,103 @@ impl Default for SystemInfoWidget {
     }
 }
 
+enum StatType {
+    Disc,
+    Ram,
+    CpuLoad,
+    CpuTemp,
+    Uptime,
+}
+
 impl SystemInfoWidget {
     pub fn new() -> Self {
         Object::builder().build()
     }
-    pub fn setup_systemstat(&self) {
-        let sys = System::new();
 
-        match sys.mount_at("/") {
-            Ok(mount) => {
-                self.imp()
-                    .disc
-                    .set_text(format!(" {}", mount.avail.to_string()).as_str());
+    fn call_and_set_systemstat(&self) {
+        let (s, r) = async_channel::unbounded();
+
+        gio::spawn_blocking(move || {
+            let sys = System::new();
+
+            match sys.mount_at("/") {
+                Ok(mount) => {
+                    let _res = s.send_blocking((StatType::Disc, format!("{}", mount.avail)));
+                }
+                Err(x) => println!("\nMount at /: error: {}", x),
             }
-            Err(x) => println!("\nMount at /: error: {}", x),
-        }
-
-        // match sys.battery_life() {
-        //     Ok(battery) => print!(
-        //         "\nBattery: {}%, {}h{}m remaining",
-        //         battery.remaining_capacity * 100.0,
-        //         battery.remaining_time.as_secs() / 3600,
-        //         battery.remaining_time.as_secs() % 60
-        //     ),
-        //     Err(x) => print!("\nBattery: error: {}", x),
-        // }
-
-        // match sys.on_ac_power() {
-        //     Ok(power) => println!(", AC power: {}", power),
-        //     Err(x) => println!(", AC power: error: {}", x),
-        // }
-
-        match sys.memory() {
-            Ok(mem) => {
-                self.imp()
-                    .ram
-                    .set_text(format!(" {}", saturating_sub_bytes(mem.total, mem.free)).as_str());
+            match sys.memory() {
+                Ok(mem) => {
+                    let _res = s.send_blocking((
+                        StatType::Ram,
+                        format!("{}", saturating_sub_bytes(mem.total, mem.free)),
+                    ));
+                }
+                Err(x) => println!("\nMemory: error: {}", x),
             }
-            Err(x) => println!("\nMemory: error: {}", x),
-        }
 
-        // match sys.swap() {
-        //     Ok(swap) => {
-        //         self.imp().swap.set_text(
-        //             format!("Swap: {}", saturating_sub_bytes(swap.total, swap.free)).as_str(),
-        //         );
-        //     }
-        //     Err(x) => println!("\nSwap: error: {}", x),
-        // }
-
-        match sys.uptime() {
-            Ok(uptime) => self
-                .imp()
-                .uptime
-                .set_text(format!("  {}min", (uptime.as_secs() / 60) as u32).as_str()),
-            Err(x) => println!("\nUptime: error: {}", x),
-        }
-
-        // match sys.boot_time() {
-        //     Ok(boot_time) => println!("\nBoot time: {}", boot_time),
-        //     Err(x) => println!("\nBoot time: error: {}", x),
-        // }
-
-        match sys.cpu_load_aggregate() {
-            Ok(cpu) => {
-                thread::sleep(Duration::from_secs(1));
-                let cpu = cpu.done().unwrap();
-                // let prom =
-                //     (cpu.user + cpu.nice + cpu.system + cpu.interrupt + cpu.idle) * 100.0 / 5.0;
-                self.imp()
-                    .cpu_load
-                    .set_text(format!("   {}%.", (cpu.user * 100.0).round()).as_str());
+            match sys.uptime() {
+                Ok(uptime) => {
+                    let _res = s.send_blocking((
+                        StatType::Uptime,
+                        format!("{}min", (uptime.as_secs() / 60) as u32),
+                    ));
+                }
+                Err(x) => println!("\nUptime: error: {}", x),
             }
-            Err(x) => println!("\nCPU load: error: {}", x),
-        }
 
-        match sys.cpu_temp() {
-            Ok(cpu_temp) => self
-                .imp()
-                .cpu_temp
-                .set_text(format!("󰏈   {}", cpu_temp).as_str()),
-            Err(x) => println!("\nCPU temp: {}", x),
-        }
-    }
-    fn setup_tick(&self) {
-        let system_widget = self.clone();
-        let tick_systeminfo = move || {
-            system_widget.setup_systemstat();
-            // we could return glib::ControlFlow::Break to stop our clock after this tick
-            glib::ControlFlow::Continue
-        };
-        glib::timeout_add_seconds_local(5, tick_systeminfo);
+            match sys.cpu_load_aggregate() {
+                Ok(cpu) => {
+                    thread::sleep(Duration::from_secs(1));
+                    let cpu = cpu.done().unwrap();
+                    // let prom =
+                    //     (cpu.user + cpu.nice + cpu.system + cpu.interrupt + cpu.idle) * 100.0 / 5.0;
+                    let _res = s.send_blocking((
+                        StatType::CpuLoad,
+                        format!("{}%.", (cpu.user * 100.0).round()),
+                    ));
+                }
+                Err(x) => println!("\nCPU load: error: {}", x),
+            }
+
+            match sys.cpu_temp() {
+                Ok(cpu_temp) => {
+                    let _res = s.send_blocking((StatType::CpuTemp, format!("{}ºC", cpu_temp)));
+                }
+                Err(x) => println!("\nCPU TEMP:   {}", x),
+            }
+        });
+        // Ofcourse there is some better ways
+        glib::spawn_future_local(clone! (@weak self as widget => async move {
+            while let  Ok(res) = r.recv().await {
+                match res.0 {
+                    StatType::Disc => {
+                        widget.imp()
+                            .disk_data
+                            .set_text(&res.1);
+                    },
+                    StatType::Ram => {
+                        widget.imp()
+                            .ram_data
+                            .set_text(&res.1);
+                    },
+                    StatType::CpuLoad => {
+                        widget.imp()
+                            .cpu_load_data
+                            .set_text(&res.1);
+                    },
+                    StatType::CpuTemp => {
+                        widget.imp()
+                            .cpu_temp_data
+                            .set_text(&res.1);
+                    },
+                    StatType::Uptime => {
+                        widget.imp()
+                            .uptime_data
+                            .set_text(&res.1);
+                    },
+                }
+            }
+        }));
     }
 }
