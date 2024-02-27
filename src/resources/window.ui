@@ -30,16 +30,6 @@
             <property name="orientation">horizontal</property>
           </object>
         </child>
-        <child>
-          <object class="GtkBox" id="focused_box">
-            <property name="orientation">horizontal</property>
-            <child>
-              <object class="GtkLabel" id="focused_label">
-                <property name="label"></property>
-              </object>
-            </child>
-          </object>
-        </child>
       </object>
     </child>
   </template>

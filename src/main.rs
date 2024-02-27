@@ -1,9 +1,12 @@
 // mod fixed_size_layout_manager;
 mod custom_layout;
-mod network_widget;
+mod focused_app;
+mod gammarelay;
+mod keyboard_layout;
+mod network;
 mod networkmanager;
 mod systeminfo;
-mod vol_widget;
+mod volume;
 mod window;
 mod ws_object;
 mod ws_widget;

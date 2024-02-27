@@ -44,6 +44,7 @@ impl NetworkWidget {
         );
 
         if let Ok(state) = p.state() {
+            println!("{:?}", state);
             self.imp().state.set(translate_nmstate(state));
         }
         self.update_network(nm.clone());

@@ -8,9 +8,8 @@ use gtk::subclass::prelude::ObjectSubclassIsExt;
 use gtk::{gio, glib, Application, Box, ListItem, NoSelection, SignalListItemFactory};
 use gtk::{prelude::*, Label};
 
-use crate::network_widget::NetworkWidget;
 use crate::systeminfo::SystemInfoWidget;
-use crate::vol_widget::VolWidget;
+use crate::volume::VolWidget;
 use crate::ws_object::WsObject;
 use crate::ws_widget::WsWidget;
 
@@ -43,34 +42,18 @@ impl Window {
         self.set_default_size(width, height);
     }
 
-    fn setup_volume(&self) {
-        self.first_child()
+    fn setup_child_widgets(&self) {
+        let gtk_box = self
+            .first_child()
             .expect("box")
             .downcast::<Box>()
-            .expect("gtk box")
-            .append(&VolWidget::new());
-    }
-
-    fn setup_network(&self) {
-        self.first_child()
-            .expect("box")
-            .downcast::<Box>()
-            .expect("gtk box")
-            .append(&NetworkWidget::new());
-    }
-
-    fn setup_systeminfo(&self) {
-        self.first_child()
-            .expect("box")
-            .downcast::<Box>()
-            .expect("gtk box")
-            .append(&SystemInfoWidget::new());
-    }
-
-    fn setup_focused(&self) {
-        self.imp()
-            .focused_label
-            .set_text(&self.imp().focused_app.borrow());
+            .expect("gtk_box");
+        gtk_box.append(&self.imp().focused_app_widget);
+        gtk_box.append(&self.imp().network_widget);
+        gtk_box.append(&VolWidget::new());
+        gtk_box.append(&SystemInfoWidget::new());
+        gtk_box.append(&self.imp().keyboard_layout_widget);
+        gtk_box.append(&self.imp().gammarelay_widget);
     }
 
     fn workspaces(&self) -> gio::ListStore {
@@ -199,12 +182,21 @@ impl Window {
     }
 
     fn setup_sway_events(&self) {
-        let conn = swayipc::Connection::new().expect("conn");
+        //TODO: Deberia separar esto... generar nuevos componentes y mandarles los eventos
+        let mut conn = swayipc::Connection::new().expect("conn");
         let (sender, receiver) = async_channel::unbounded();
+
+        self.imp()
+            .keyboard_layout_widget
+            .setup_layout(conn.get_inputs());
 
         gio::spawn_blocking(move || {
             let ws_event = conn
-                .subscribe([swayipc::EventType::Workspace, swayipc::EventType::Window])
+                .subscribe([
+                    swayipc::EventType::Workspace,
+                    swayipc::EventType::Window,
+                    swayipc::EventType::Input,
+                ])
                 .expect("ws event");
 
             for e in ws_event {
@@ -232,9 +224,7 @@ impl Window {
                                         current_node.focused,
                                     );
                                     window.new_workspace(ws_object);
-                                    *window.imp().focused_app.borrow_mut() = "".to_string();
-                                    window.setup_focused();
-
+                                    window.imp().focused_app_widget.setup_focused("");
                                 }
                             },
                             swayipc::WorkspaceChange::Focus => {
@@ -255,33 +245,10 @@ impl Window {
                         }
                     },
                     Ok(swayipc::Event::Window(ev)) => {
-
-                        if ev.change == swayipc::WindowChange::Close {
-                                *window.imp().focused_app.borrow_mut() = "".to_string();
-                                window.setup_focused();
-                        }
-                        if ev.change == swayipc::WindowChange::Focus || ev.change == swayipc::WindowChange::Title { // Also Title event
-                            if ev.container.focused {
-                                if let Some(app_name) = ev.container.name {
-                                    *window.imp().focused_app.borrow_mut() = app_name;
-                                    window.setup_focused();
-                                }
-
-
-                            }
-                        }
-                // if let Some(current_node)  = ev.current.clone() {
-                //     if let Some(focused) = current_node.find_focused(|node:&swayipc::Node| -> bool {
-                //         node.focused
-                //     }) {
-                //         if let Some(focused_name) = focused.name {
-                //             println!("{}", focused_name);
-                //             *window.imp().focused_app.borrow_mut() = focused_name;
-                //             window.setup_focused();
-                //         }
-                //     }
-                // }
-
+                        window.imp().focused_app_widget.focused_app_from_sway_ev(ev);
+                    },
+                    Ok(swayipc::Event::Input(ev)) => {
+                        window.imp().keyboard_layout_widget.layout_from_sway_ev(ev);
                     },
                     _ => {},
                 }

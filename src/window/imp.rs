@@ -8,6 +8,11 @@ use gtk::{glib, CompositeTemplate};
 use gtk::{prelude::*, Box};
 use gtk::{Label, ListView};
 
+use crate::focused_app::FocusedAppWidget;
+use crate::gammarelay::GammarelayWidget;
+use crate::keyboard_layout::KeyboardLayoutWidget;
+use crate::network::NetworkWidget;
+
 // Object holding the state
 #[derive(Properties, CompositeTemplate, Default)]
 #[template(resource = "/org/gtk_rs/rusticbar/window.ui")]
@@ -21,11 +26,10 @@ pub struct Window {
     #[template_child(id = "wss_list")]
     pub wss_list: TemplateChild<ListView>,
     pub workspaces: RefCell<Option<gio::ListStore>>,
-    pub focused_app: RefCell<String>,
-    #[template_child(id = "focused_box")]
-    pub focused_box: TemplateChild<Box>,
-    #[template_child(id = "focused_label")]
-    pub focused_label: TemplateChild<Label>,
+    pub focused_app_widget: FocusedAppWidget,
+    pub keyboard_layout_widget: KeyboardLayoutWidget,
+    pub network_widget: NetworkWidget,
+    pub gammarelay_widget: GammarelayWidget,
 }
 
 // The central trait for subclassing a GObject
@@ -60,10 +64,7 @@ impl ObjectImpl for Window {
         self.obj().setup_workspaces();
         self.obj().setup_sway_events();
         self.obj().setup_factory();
-        self.obj().setup_volume();
-        self.obj().setup_network();
-        self.obj().setup_focused();
-        self.obj().setup_systeminfo();
+        self.obj().setup_child_widgets();
     }
 }
 

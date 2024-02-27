@@ -6,3 +6,4 @@
 - network-manager
 - libdbus-1-dev
 - pkg-config
+- wl-gammarelay-rs (if you want)

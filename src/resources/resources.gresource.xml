@@ -2,6 +2,9 @@
 <gresources>
   <gresource prefix="/org/gtk_rs/rusticbar/">
     <file compressed="true" preprocess="xml-stripblanks">window.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">gammarelay.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">focused_app.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">keyboard_layout.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">workspace.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">systeminfo.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">volume.ui</file>

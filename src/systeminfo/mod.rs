@@ -6,7 +6,6 @@ use gtk::{
     glib::{self, clone},
     prelude::*,
     subclass::prelude::ObjectSubclassIsExt,
-    Popover, ToggleButton,
 };
 use std::thread;
 use std::time::Duration;
@@ -35,6 +34,29 @@ enum StatType {
 impl SystemInfoWidget {
     pub fn new() -> Self {
         Object::builder().build()
+    }
+
+    fn setup_popover(&self) {
+        let popover = self.imp().popover.get();
+        popover.connect_closed(clone!(@weak self as widget => move |_| {
+            widget.imp().ticking.set(false);
+        }));
+        self.imp().button.set_create_popup_func(
+            clone!(@weak self as widget => move |_menu_button| {
+                popover.popup();
+                widget.call_and_set_systemstat();
+                widget.imp().ticking.set(true);
+                let tick_systeminfo = move || {
+                    if widget.imp().ticking.get() {
+                        widget.call_and_set_systemstat();
+                        return glib::ControlFlow::Continue;
+                    } else {
+                        return glib::ControlFlow::Break;
+                    }
+                };
+                glib::timeout_add_seconds_local(2, tick_systeminfo);
+            }),
+        );
     }
 
     fn call_and_set_systemstat(&self) {
