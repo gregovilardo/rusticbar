@@ -10,7 +10,7 @@ use passcod_networkmanager::devices::{Any, Device, Wired, Wireless};
 use passcod_networkmanager::{Error, NetworkManager};
 use std::time::Duration;
 
-use crate::networkmanager::{
+use crate::networkmanager_dbus::{
     OrgFreedesktopDBusPropertiesPropertiesChanged, OrgFreedesktopNetworkManager,
 };
 

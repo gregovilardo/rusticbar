@@ -2,9 +2,10 @@
 mod custom_layout;
 mod focused_app;
 mod gammarelay;
+mod gammarelay_dbus;
 mod keyboard_layout;
 mod network;
-mod networkmanager;
+mod networkmanager_dbus;
 mod systeminfo;
 mod volume;
 mod window;
