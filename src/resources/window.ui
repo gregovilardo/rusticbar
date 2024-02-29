@@ -18,11 +18,6 @@
         <property name="margin-end">20</property>
         <property name="spacing">10</property>
         <child>
-          <object class="GtkLabel" id="time_label">
-            <property name="label">11:11</property>
-          </object>
-        </child>
-        <child>
           <object class="GtkSeparator"></object>
         </child>
         <child>

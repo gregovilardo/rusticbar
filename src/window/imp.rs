@@ -12,21 +12,22 @@ use crate::focused_app::FocusedAppWidget;
 use crate::gammarelay::GammarelayWidget;
 use crate::keyboard_layout::KeyboardLayoutWidget;
 use crate::network::NetworkWidget;
+use crate::systeminfo::SystemInfoWidget;
+use crate::time::TimeWidget;
+use crate::volume::VolWidget;
 
 // Object holding the state
-#[derive(Properties, CompositeTemplate, Default)]
+#[derive(CompositeTemplate, Default)]
 #[template(resource = "/org/gtk_rs/rusticbar/window.ui")]
-#[properties(wrapper_type = super::Window)]
+// #[properties(wrapper_type = super::Window)]
 pub struct Window {
-    #[template_child(id = "time_label")]
-    pub time_label: TemplateChild<Label>,
-    #[property(get, set = Self::set_time_label)]
-    pub time: RefCell<String>,
-    // #[property(get, set = Self::set_workspaces)]
     #[template_child(id = "wss_list")]
     pub wss_list: TemplateChild<ListView>,
     pub workspaces: RefCell<Option<gio::ListStore>>,
+    pub time_widget: TimeWidget,
     pub focused_app_widget: FocusedAppWidget,
+    pub vol_widget: VolWidget,
+    pub system_info_widget: SystemInfoWidget,
     pub keyboard_layout_widget: KeyboardLayoutWidget,
     pub network_widget: NetworkWidget,
     pub gammarelay_widget: GammarelayWidget,
@@ -49,14 +50,9 @@ impl ObjectSubclass for Window {
     }
 }
 
-impl Window {
-    fn set_time_label(&self, time: String) {
-        self.time_label.set_text(&time.clone());
-        *self.time.borrow_mut() = time;
-    }
-}
+impl Window {}
 
-#[glib::derived_properties]
+// #[glib::derived_properties]
 impl ObjectImpl for Window {
     fn constructed(&self) {
         self.parent_constructed();
@@ -65,6 +61,7 @@ impl ObjectImpl for Window {
         self.obj().setup_sway_events();
         self.obj().setup_factory();
         self.obj().setup_child_widgets();
+        self.obj().change_workspace();
     }
 }
 

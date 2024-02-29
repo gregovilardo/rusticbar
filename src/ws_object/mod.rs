@@ -14,7 +14,7 @@ impl Default for WsObject {
 }
 
 impl WsObject {
-    pub fn new(num: u8, name: String, focused: bool) -> Self {
+    pub fn new(num: i32, name: String, focused: bool) -> Self {
         Object::builder()
             .property("num", num)
             .property("name", name)
@@ -25,7 +25,7 @@ impl WsObject {
 
 #[derive(Default)]
 pub struct WsData {
-    pub num: u8,
+    pub num: i32,
     pub name: String,
     pub focused: bool,
 }

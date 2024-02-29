@@ -11,7 +11,7 @@ use super::WsData;
 #[derive(Properties, Default)]
 #[properties(wrapper_type = super::WsObject)]
 pub struct WsObject {
-    #[property(name = "num", get, set, type = u8, member = num)]
+    #[property(name = "num", get, set, type = i32, member = num)]
     #[property(name = "name", get, set, type = String, member = name)]
     #[property(name = "focused", get, set, type = bool, member = focused)]
     pub data: RefCell<WsData>,

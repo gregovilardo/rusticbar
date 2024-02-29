@@ -7,6 +7,7 @@ mod keyboard_layout;
 mod network;
 mod networkmanager_dbus;
 mod systeminfo;
+mod time;
 mod volume;
 mod window;
 mod ws_object;
@@ -18,9 +19,7 @@ use gtk::prelude::*;
 use gtk::{gio, glib, Application, CssProvider};
 use gtk4_layer_shell as layer_shell;
 use layer_shell::LayerShell;
-use window::{get_time, Window};
-
-use swayipc::{self};
+use window::Window;
 
 const APP_ID: &str = "org.gtk_rs.RusticBar";
 
@@ -59,23 +58,11 @@ fn load_css() {
 fn build_ui(app: &Application) {
     // Create new window and present it
     let window = Window::new(app);
-
     window.init_layer_shell();
     window.set_layer(layer_shell::Layer::Top);
     window.set_anchor(layer_shell::Edge::Top, true);
     window.set_anchor(layer_shell::Edge::Left, true);
     window.set_anchor(layer_shell::Edge::Right, true);
     window.auto_exclusive_zone_enable();
-
     window.present();
-
-    let tick_time = move || {
-        let time = get_time();
-        window.set_time(time);
-        // we could return glib::ControlFlow::Break to stop our clock after this tick
-        glib::ControlFlow::Continue
-    };
-
-    // executes the closure once every second
-    glib::timeout_add_seconds_local(1, tick_time);
 }

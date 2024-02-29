@@ -26,7 +26,6 @@ impl WsWidget {
     }
 
     pub fn bind(&self, ws_object: &WsObject) {
-        // Get state
         let ws_label = self.imp().ws_label.get(); // ws_label is in WsWidget
         let mut bindings = self.imp().bindings.borrow_mut();
 
@@ -36,7 +35,7 @@ impl WsWidget {
             .build();
         bindings.push(ws_label_binding);
 
-        let ws_label_binding = ws_object
+        let ws_att_binding = ws_object
             .bind_property("focused", &ws_label, "attributes")
             .sync_create()
             .transform_to(|_, is_focused| {
@@ -48,9 +47,10 @@ impl WsWidget {
                 Some(attribute_list.to_value())
             })
             .build();
-        bindings.push(ws_label_binding);
+        bindings.push(ws_att_binding);
 
-        let ws_label_binding = ws_object
+        //This is for the css
+        let ws_name_binding = ws_object
             .bind_property("focused", &ws_label, "name")
             .sync_create()
             .transform_to(|_, is_focused| {
@@ -61,7 +61,7 @@ impl WsWidget {
                 Some(widget_name.to_value())
             })
             .build();
-        bindings.push(ws_label_binding);
+        bindings.push(ws_name_binding);
     }
 
     pub fn unbind(&self) {
