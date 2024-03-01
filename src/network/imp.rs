@@ -5,6 +5,8 @@ use glib::ObjectExt;
 use glib::Properties;
 use gtk::pango::AttrList;
 use gtk::subclass::prelude::*;
+use gtk::Box;
+use gtk::Revealer;
 use gtk::{glib, CompositeTemplate, Label};
 
 use crate::custom_layout::CustomLayout;
@@ -41,10 +43,16 @@ pub struct NetworkWidget {
     pub network_name_label: TemplateChild<Label>,
     #[template_child(id = "icon")]
     pub icon: TemplateChild<Label>,
+    #[template_child(id = "network_box")]
+    pub network_box: TemplateChild<Box>,
     #[property(get, set = Self::set_name)]
     pub network_name: RefCell<String>,
     pub state: Cell<NMState>,
     pub connection: Cell<ConnectionType>,
+    #[template_child(id = "network_revealer_label")]
+    pub revealer_label: TemplateChild<Revealer>,
+    #[template_child(id = "network_revealer_box")]
+    pub revealer_box: TemplateChild<Revealer>,
 }
 
 // The central trait for subclassing a GObject
@@ -74,7 +82,7 @@ impl NetworkWidget {
         match self.state.get() {
             NMState::ConnectedGlobal => {
                 self.network_name_label.set_attributes(Some(
-                    &AttrList::from_string("0 -1 weight 700").expect("att"),
+                    &AttrList::from_string("0 -1 weight 500").expect("att"),
                 ));
                 match self.connection.get() {
                     ConnectionType::Wireless => {
@@ -105,6 +113,7 @@ impl ObjectImpl for NetworkWidget {
     fn constructed(&self) {
         self.parent_constructed();
         self.obj().setup_network();
+        self.obj().setup_motions();
     }
 }
 

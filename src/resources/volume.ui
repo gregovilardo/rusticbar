@@ -2,7 +2,7 @@
 <interface>
   <template class="VolumeBox" parent="GtkBox">
     <child>
-      <object class="GtkBox">
+      <object class="GtkBox" id="volume_box">
         <child>
           <object class="GtkLabel" id="vol_label">
             <property name="label"></property>
@@ -13,17 +13,20 @@
           </object>
         </child>
         <child>
-          <object class="GtkLevelBar" id="vol_level_bar">
-            <property name="width-request">100</property>
-            <property name="margin-top">10</property>
-            <property name="margin-bottom">9</property>
-            <property name="orientation">horizontal</property>
-            <property name="max-value">100</property>
-            <property name="min-value">0</property>
-            <!-- <property name="value">40</property> -->
+          <object class="GtkRevealer" id="level_bar_revealer">
+            <child>
+              <object class="GtkLevelBar" id="vol_level_bar">
+                <property name="width-request">100</property>
+                <property name="margin-top">10</property>
+                <property name="margin-bottom">9</property>
+                <property name="orientation">horizontal</property>
+                <property name="max-value">100</property>
+                <property name="min-value">0</property>
+                <!-- <property name="value">40</property> -->
+              </object>
+            </child>
           </object>
         </child>
-
       </object>
     </child>
   </template>

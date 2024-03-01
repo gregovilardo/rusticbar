@@ -5,6 +5,8 @@ use glib::Binding;
 use glib::ObjectExt;
 use glib::Properties;
 use gtk::subclass::prelude::*;
+use gtk::Box;
+use gtk::Revealer;
 use gtk::{glib, CompositeTemplate, Label, LevelBar};
 
 use crate::custom_layout::CustomLayout;
@@ -20,6 +22,10 @@ pub struct VolWidget {
     pub vol_label: TemplateChild<Label>,
     #[template_child]
     pub vol_level_bar: TemplateChild<LevelBar>,
+    #[template_child]
+    pub level_bar_revealer: TemplateChild<Revealer>,
+    #[template_child]
+    pub volume_box: TemplateChild<Box>,
 
     #[property(get, set = Self::set_mute_label)]
     pub mute: Cell<bool>,
@@ -64,6 +70,7 @@ impl ObjectImpl for VolWidget {
     fn constructed(&self) {
         self.parent_constructed();
         self.obj().setup_volume_event();
+        self.obj().setup_motions();
     }
 }
 

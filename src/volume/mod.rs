@@ -2,7 +2,10 @@ mod imp;
 
 use alsa::mixer::{Mixer, Selem, SelemChannelId, SelemId};
 use glib::{clone, Object};
-use gtk::{gio, glib};
+use gtk::{
+    gio, glib, prelude::*, subclass::prelude::ObjectSubclassIsExt, EventControllerMotion,
+    RevealerTransitionType,
+};
 
 glib::wrapper! {
     pub struct VolWidget(ObjectSubclass<imp::VolWidget>)
@@ -19,6 +22,24 @@ impl Default for VolWidget {
 impl VolWidget {
     pub fn new() -> Self {
         Object::builder().build()
+    }
+    fn setup_motions(&self) {
+        let revealer = self.imp().level_bar_revealer.get();
+        let event_controler = EventControllerMotion::new();
+
+        revealer.set_transition_type(RevealerTransitionType::SlideRight);
+        revealer.set_transition_duration(1000);
+        revealer.set_reveal_child(false);
+        let revealer_clone = revealer.clone();
+
+        event_controler.connect_enter(move |_, _, _| {
+            revealer.set_reveal_child(true);
+        });
+        event_controler.connect_leave(move |_| {
+            revealer_clone.set_reveal_child(false);
+        });
+
+        self.imp().volume_box.add_controller(event_controler);
     }
 
     fn setup_volume_event(&self) {
@@ -48,6 +69,7 @@ impl VolWidget {
             while let Ok(status) = receiver.recv().await {
                 vol_widget.set_volume(status.0);
                 vol_widget.set_mute(status.1);
+                // self.imp().volume_box.get().
             }
         }));
     }

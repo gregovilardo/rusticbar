@@ -5,7 +5,8 @@ use dbus::blocking::Connection;
 use dbus::Message;
 use glib::{clone, Object};
 use gtk::subclass::prelude::ObjectSubclassIsExt;
-use gtk::{gio, glib};
+use gtk::{gio, glib, prelude::WidgetExt};
+use gtk::{EventControllerMotion, Revealer, RevealerTransitionType};
 use passcod_networkmanager::devices::{Any, Device, Wired, Wireless};
 use passcod_networkmanager::{Error, NetworkManager};
 use std::time::Duration;
@@ -32,6 +33,34 @@ impl NetworkWidget {
     pub fn new() -> Self {
         Object::builder().build()
     }
+
+    fn setup_motions(&self) {
+        let revealer_label = self.imp().revealer_label.get();
+        let revealer_box = self.imp().revealer_box.get();
+        let event_controler = EventControllerMotion::new();
+
+        revealer_label.set_transition_type(RevealerTransitionType::Crossfade);
+        revealer_label.set_transition_duration(1000);
+        revealer_label.set_reveal_child(false);
+        revealer_box.set_transition_type(RevealerTransitionType::SlideRight);
+        revealer_box.set_transition_duration(2000);
+        revealer_box.set_reveal_child(false);
+
+        let revealer_label_clone = revealer_label.clone();
+        let revealer_box_clone = revealer_box.clone();
+
+        event_controler.connect_enter(move |_, _, _| {
+            revealer_box.set_reveal_child(true);
+            revealer_label.set_reveal_child(true);
+        });
+        event_controler.connect_leave(move |_| {
+            revealer_label_clone.set_reveal_child(false);
+            revealer_box_clone.set_reveal_child(false);
+        });
+
+        self.imp().network_box.add_controller(event_controler);
+    }
+
     fn setup_network(&self) {
         let nm = NetworkManager::new().expect("network");
         let (send, recv) = async_channel::unbounded();
@@ -96,7 +125,8 @@ impl NetworkWidget {
                     if let Ok(conn) = x.active_connection() {
                         if let Ok(_state) = conn.state() {
                             self.imp().connection.set(ConnectionType::Wired);
-                            self.set_network_name(x.ip_interface().expect("ip interface"));
+                            // self.set_network_name(x.ip_interface().expect("ip interface"));
+                            self.set_network_name("Ethernet");
                             return;
                         }
                     }
