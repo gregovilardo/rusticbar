@@ -46,16 +46,20 @@ impl NetworkWidget {
         revealer_box.set_transition_duration(2000);
         revealer_box.set_reveal_child(false);
 
-        let revealer_label_clone = revealer_label.clone();
-        let revealer_box_clone = revealer_box.clone();
-
-        event_controler.connect_enter(move |_, _, _| {
-            revealer_box.set_reveal_child(true);
-            revealer_label.set_reveal_child(true);
+        event_controler.connect_enter({
+            let revealer_label = revealer_label.clone();
+            let revealer_box = revealer_box.clone();
+            move |_, _, _| {
+                revealer_box.set_reveal_child(true);
+                revealer_label.set_reveal_child(true);
+            }
         });
-        event_controler.connect_leave(move |_| {
-            revealer_label_clone.set_reveal_child(false);
-            revealer_box_clone.set_reveal_child(false);
+
+        event_controler.connect_leave({
+            move |_| {
+                revealer_label.set_reveal_child(false);
+                revealer_box.set_reveal_child(false);
+            }
         });
 
         self.imp().network_box.add_controller(event_controler);

@@ -23,23 +23,53 @@ impl VolWidget {
     pub fn new() -> Self {
         Object::builder().build()
     }
+
     fn setup_motions(&self) {
         let revealer = self.imp().level_bar_revealer.get();
         let event_controler = EventControllerMotion::new();
+        self.imp().enlarge_dur.set(true);
 
         revealer.set_transition_type(RevealerTransitionType::SlideRight);
         revealer.set_transition_duration(1000);
         revealer.set_reveal_child(false);
-        let revealer_clone = revealer.clone();
 
-        event_controler.connect_enter(move |_, _, _| {
-            revealer.set_reveal_child(true);
+        event_controler.connect_enter({
+            let revealer = revealer.clone();
+            move |_, _, _| {
+                revealer.set_reveal_child(true);
+            }
         });
-        event_controler.connect_leave(move |_| {
-            revealer_clone.set_reveal_child(false);
+        event_controler.connect_leave({
+            let revealer = revealer.clone();
+            move |_| {
+                revealer.set_reveal_child(false);
+            }
         });
 
         self.imp().volume_box.add_controller(event_controler);
+        // HAS to be a nicer way to do this
+
+        let (sender, receiver) = async_channel::unbounded();
+
+        revealer.connect_child_revealed_notify(move |_rev| {
+            let _res = sender.send_blocking(true);
+        });
+
+        glib::spawn_future_local(clone! (@weak self as vol_widget => async move {
+                while let Ok(_revealer) = receiver.recv().await {
+                    while vol_widget.imp().enlarge_dur.get() {
+                        vol_widget.imp().enlarge_dur.set(false);
+                        let _res = gio::spawn_blocking(move || {
+                            std::thread::sleep(std::time::Duration::from_secs(2));
+                        }).await;
+                        // if we receive another signal while sleeping enlarge duraiton..
+                        if vol_widget.imp().enlarge_dur.get() {
+                            continue;
+                        }
+                        vol_widget.imp().level_bar_revealer.get().set_reveal_child(false);
+                    }
+                 }
+        }));
     }
 
     fn setup_volume_event(&self) {
@@ -69,7 +99,8 @@ impl VolWidget {
             while let Ok(status) = receiver.recv().await {
                 vol_widget.set_volume(status.0);
                 vol_widget.set_mute(status.1);
-                // self.imp().volume_box.get().
+                vol_widget.imp().level_bar_revealer.set_reveal_child(true);
+                vol_widget.imp().enlarge_dur.set(true);
             }
         }));
     }

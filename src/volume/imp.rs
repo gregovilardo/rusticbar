@@ -6,6 +6,7 @@ use glib::ObjectExt;
 use glib::Properties;
 use gtk::subclass::prelude::*;
 use gtk::Box;
+use gtk::EventControllerMotion;
 use gtk::Revealer;
 use gtk::{glib, CompositeTemplate, Label, LevelBar};
 
@@ -26,9 +27,9 @@ pub struct VolWidget {
     pub level_bar_revealer: TemplateChild<Revealer>,
     #[template_child]
     pub volume_box: TemplateChild<Box>,
-
     #[property(get, set = Self::set_mute_label)]
     pub mute: Cell<bool>,
+    pub enlarge_dur: Cell<bool>,
 }
 
 // The central trait for subclassing a GObject
