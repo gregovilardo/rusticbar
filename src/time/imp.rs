@@ -1,7 +1,7 @@
 use glib::Properties;
 use gtk::pango::AttrList;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Label};
+use gtk::{glib, CompositeTemplate, Label, Popover};
 
 use crate::custom_layout::CustomLayout;
 
@@ -12,6 +12,8 @@ use crate::custom_layout::CustomLayout;
 pub struct TimeWidget {
     #[template_child(id = "time_label")]
     pub time_label: TemplateChild<Label>,
+    #[template_child(id = "calendar_popover")]
+    pub calendar_popover: TemplateChild<Popover>,
     // pub layout: Time,
 }
 
@@ -41,6 +43,7 @@ impl ObjectImpl for TimeWidget {
     fn constructed(&self) {
         self.parent_constructed();
         self.obj().setup_time();
+        self.obj().setup_calendar();
     }
 }
 

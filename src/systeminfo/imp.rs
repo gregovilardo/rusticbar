@@ -2,7 +2,7 @@ use std::cell::Cell;
 
 use crate::custom_layout::CustomLayout;
 use gtk::subclass::prelude::*;
-use gtk::MenuButton;
+// use gtk::MenuButton;
 use gtk::Popover;
 use gtk::{glib, CompositeTemplate, Label};
 
@@ -33,8 +33,8 @@ pub struct SystemInfoWidget {
     pub uptime_data: TemplateChild<Label>,
     #[template_child(id = "stat_popover")]
     pub popover: TemplateChild<Popover>,
-    #[template_child(id = "menu_button")]
-    pub button: TemplateChild<MenuButton>,
+    // #[template_child(id = "menu_button")]
+    // pub button: TemplateChild<MenuButton>,
     pub ticking: Cell<bool>,
 }
 
@@ -73,21 +73,3 @@ impl WidgetImpl for SystemInfoWidget {}
 
 // Trait shared by all boxes
 impl BoxImpl for SystemInfoWidget {}
-
-// popover_box.append(&self.disc);
-// self.disc_icon.set_from_file(Some(
-//     "/home/gregovilardo/Documents/rust/rusticbar/src/disc.png",
-// ));
-// self.disc_icon.set_pixel_size(30);
-// let boxx = Box::new(gtk::Orientation::Horizontal, 5);
-// // boxx.append(&self.disc_icon);
-// boxx.append(&self.disc);
-// popover_box.append(&boxx);
-// self.ram_icon.set_from_file(Some(
-//     "/home/gregovilardo/Documents/rust/rusticbar/src/ram2.png",
-// ));
-// self.ram_icon.set_pixel_size(30);
-// let boxx = Box::new(gtk::Orientation::Horizontal, 5);
-// // boxx.append(&self.ram_icon);
-// boxx.append(&self.ram);
-//

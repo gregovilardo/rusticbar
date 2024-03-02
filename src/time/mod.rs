@@ -1,7 +1,7 @@
 mod imp;
 use chrono::Local;
 use glib::{clone, Object};
-use gtk::{gio, glib, subclass::prelude::ObjectSubclassIsExt};
+use gtk::{gio, glib, prelude::*, subclass::prelude::ObjectSubclassIsExt, EventControllerMotion};
 
 glib::wrapper! {
     pub struct TimeWidget(ObjectSubclass<imp::TimeWidget>)
@@ -31,8 +31,31 @@ impl TimeWidget {
         // executes the closure once every second
         glib::timeout_add_seconds_local(1, tick_time);
     }
+
+    fn setup_calendar(&self) {
+        let popover = self.imp().calendar_popover.get();
+        // self.append(&popover);
+        let event_controler = EventControllerMotion::new();
+
+        event_controler.connect_enter({
+            let popover = popover.clone();
+            move |_, _, _| {
+                popover.popup();
+            }
+        });
+        event_controler.connect_leave({
+            let popover = popover.clone();
+            move |_| {
+                popover.popdown();
+            }
+        });
+
+        self.add_controller(event_controler);
+        // println!("{:#?}", );
+    }
 }
 
 pub fn get_time() -> String {
-    format!("{}", Local::now().format("%Y-%m-%d %H:%M:%S"))
+    // format!("{}", Local::now().format("%Y-%m-%d %H:%M:%S"))
+    format!("{}", Local::now().format("%H:%M:%S"))
 }

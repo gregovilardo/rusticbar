@@ -1,12 +1,10 @@
 mod imp;
-use crate::gammarelay_dbus::{OrgFreedesktopDBusPropertiesPropertiesChanged, RsWlGammarelay};
+use crate::gammarelay_dbus::RsWlGammarelay;
 
 use dbus::blocking::Connection;
-use glib::{clone, Object};
-use gtk::{
-    glib, subclass::prelude::ObjectSubclassIsExt, traits::AdjustmentExt, traits::ButtonExt,
-    traits::RangeExt, traits::ScaleExt, CompositeTemplate, Label, MenuButton, Popover, Scale,
-};
+use glib::Object;
+use gtk::EventControllerMotion;
+use gtk::{glib, prelude::*, subclass::prelude::ObjectSubclassIsExt};
 use std::process::{Child, Command};
 use std::time::Duration;
 
@@ -27,10 +25,42 @@ impl GammarelayWidget {
         Object::builder().build()
     }
 
+    fn setup_button(&self) {
+        let menu_button = self.imp().menu_button.get();
+
+        menu_button
+            .first_child()
+            .expect("togglebut")
+            .first_child()
+            .expect("gtkbox")
+            .first_child()
+            .expect("label")
+            .next_sibling()
+            .expect("builticon")
+            .set_visible(false);
+
+        // let event_controler = EventControllerMotion::new();
+        //
+        // event_controler.connect_enter({
+        //     let popover = popover.clone();
+        //     move |_, _, _| {
+        //         popover.popup();
+        //     }
+        // });
+        // event_controler.connect_leave({
+        //     let popover = popover.clone();
+        //     move |_| {
+        //         popover.popdown();
+        //     }
+        // });
+        //
+        // self.add_controller(event_controler.clone());
+    }
+
     fn run_wl_gammastep(&self) -> Result<Child, Box<dyn std::error::Error>> {
         let mut gammarelay = Command::new("wl-gammarelay-rs");
         gammarelay.arg("run");
-        let mut child = gammarelay.spawn()?;
+        let child = gammarelay.spawn()?;
         std::thread::sleep(Duration::from_secs(1));
         return Ok(child);
     }

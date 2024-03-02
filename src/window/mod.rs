@@ -5,10 +5,8 @@ use gtk::gdk::{Display, Monitor};
 use gtk::prelude::DisplayExt;
 use gtk::subclass::prelude::ObjectSubclassIsExt;
 use gtk::{gio, glib, Application, Box, ListItem, NoSelection, SignalListItemFactory};
-use gtk::{prelude::*, Label};
+use gtk::{prelude::*, Separator};
 
-use crate::systeminfo::SystemInfoWidget;
-use crate::volume::VolWidget;
 use crate::ws_object::WsObject;
 use crate::ws_widget::WsWidget;
 
@@ -51,13 +49,16 @@ impl Window {
             .imp()
             .time_widget
             .insert_before(&gtk_box, Some(&self.imp().wss_list.get()));
-        // gtk_box.append(&self.imp().time_widget);
+        let separator_hexpanded = &Separator::new(gtk::Orientation::Horizontal);
+        separator_hexpanded.set_hexpand(true);
+        // let separator = &Separator::new(gtk::Orientation::Horizontal);
         gtk_box.append(&self.imp().focused_app_widget);
+        gtk_box.append(separator_hexpanded);
         gtk_box.append(&self.imp().network_widget);
         gtk_box.append(&self.imp().vol_widget);
         gtk_box.append(&self.imp().system_info_widget);
-        gtk_box.append(&self.imp().keyboard_layout_widget);
         gtk_box.append(&self.imp().gammarelay_widget);
+        gtk_box.append(&self.imp().keyboard_layout_widget);
     }
 
     fn workspaces(&self) -> gio::ListStore {
@@ -100,6 +101,7 @@ impl Window {
     }
 
     fn focus_workspace(&self, num: i32, focus_status: bool, name: String) {
+        println!("{:?}", (num, name.clone()));
         let workspaces = self.workspaces();
         let mut position = 0;
         while let Some(item) = workspaces.item(position) {
@@ -230,9 +232,9 @@ impl Window {
 
         glib::spawn_future_local(clone! (@weak self as window => async move {
                     while let Ok(ev) = receiver.recv().await {
-                                // println!("{:#?}", ev);
                         match ev {
                             Ok(swayipc::Event::Workspace(ev)) => {
+                                println!("{:#?}", ev);
                                 match ev.change {
                                     swayipc::WorkspaceChange::Init => {
                                         if let Some(current_node)  = ev.current {

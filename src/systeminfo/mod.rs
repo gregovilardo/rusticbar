@@ -6,6 +6,7 @@ use gtk::{
     glib::{self, clone},
     prelude::*,
     subclass::prelude::ObjectSubclassIsExt,
+    EventControllerMotion,
 };
 use std::thread;
 use std::time::Duration;
@@ -38,25 +39,40 @@ impl SystemInfoWidget {
 
     fn setup_popover(&self) {
         let popover = self.imp().popover.get();
+        let event_controler = EventControllerMotion::new();
+
+        event_controler.connect_enter({
+            let popover = popover.clone();
+            move |_, _, _| {
+                popover.popup();
+            }
+        });
+        event_controler.connect_leave({
+            let popover = popover.clone();
+            move |_| {
+                popover.popdown();
+            }
+        });
+
+        self.add_controller(event_controler);
+
         popover.connect_closed(clone!(@weak self as widget => move |_| {
             widget.imp().ticking.set(false);
         }));
-        self.imp().button.set_create_popup_func(
-            clone!(@weak self as widget => move |_menu_button| {
-                popover.popup();
-                widget.call_and_set_systemstat();
-                widget.imp().ticking.set(true);
-                let tick_systeminfo = move || {
-                    if widget.imp().ticking.get() {
-                        widget.call_and_set_systemstat();
-                        return glib::ControlFlow::Continue;
-                    } else {
-                        return glib::ControlFlow::Break;
-                    }
-                };
-                glib::timeout_add_seconds_local(2, tick_systeminfo);
-            }),
-        );
+
+        popover.connect_show(clone!(@weak self as widget => move |_popover| {
+            widget.call_and_set_systemstat();
+            widget.imp().ticking.set(true);
+            let tick_systeminfo = move || {
+                if widget.imp().ticking.get() {
+                    widget.call_and_set_systemstat();
+                    return glib::ControlFlow::Continue;
+                } else {
+                    return glib::ControlFlow::Break;
+                }
+            };
+            glib::timeout_add_seconds_local(2, tick_systeminfo);
+        }));
     }
 
     fn call_and_set_systemstat(&self) {

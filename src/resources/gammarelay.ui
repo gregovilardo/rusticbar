@@ -109,9 +109,16 @@
   <template class="GammarelayBox" parent="GtkBox">
     <child>
       <object class="GtkMenuButton" id="menu_button">
+        <property name="name">gamma_menu_button</property>
         <property name="popover">gamma_popover</property>
+        <property name="label"></property>
       </object>
     </child>
+    <!-- <child> -->
+    <!--   <object class="GtkLabel" id="stat_label"> -->
+    <!--     <property name="label"></property> -->
+    <!--   </object> -->
+    <!-- </child> -->
   </template>
 </interface>
 

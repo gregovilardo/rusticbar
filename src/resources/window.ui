@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
+
   <template class="MyGtkAppWindow" parent="GtkApplicationWindow">
+    <!-- <property name="css-classes">[transparent-background]</property> -->
     <property name="decorated">false</property>
     <property name="resizable">false</property>
     <property name="hexpand">true</property>
@@ -14,15 +16,18 @@
     <property name="title" translatable="yes">rusticbar</property>
     <child>
       <object class="GtkBox">
+        <property name="name">father_box</property>
         <property name="margin-start">20</property>
         <property name="margin-end">20</property>
         <property name="spacing">10</property>
         <child>
-          <object class="GtkSeparator"></object>
-        </child>
-        <child>
           <object class="GtkListView" id="wss_list">
             <property name="orientation">horizontal</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkSeparator">
+            <property name="hexpand">true</property>
           </object>
         </child>
       </object>

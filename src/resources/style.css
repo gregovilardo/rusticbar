@@ -6,6 +6,18 @@ label#ws_focused {
   color: red;
 }
 
+#calendar_menu_button {
+  opacity: 0;
+}
+
+#stat_menu_button {
+  opacity: 0;
+}
+
+/* menubutton { */
+/*   opacity: 0; */
+/* } */
+
 /* label#ws_unfocused { */
 /*   color: grey; */
 /* } */

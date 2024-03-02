@@ -54,6 +54,7 @@ impl GammarelayWidget {}
 impl ObjectImpl for GammarelayWidget {
     fn constructed(&self) {
         self.parent_constructed();
+        self.obj().setup_button();
         let _child = match self.obj().run_wl_gammastep() {
             Ok(child) => child,
             Err(err) => {
