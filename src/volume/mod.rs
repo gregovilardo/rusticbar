@@ -97,6 +97,7 @@ impl VolWidget {
         });
         glib::spawn_future_local(clone! (@weak self as vol_widget => async move {
             while let Ok(status) = receiver.recv().await {
+                vol_widget.imp().vol_level_bar.first_child().expect("gizmo0").first_child().expect("gizmo1").set_opacity(status.0/100.0);
                 vol_widget.set_volume(status.0);
                 vol_widget.set_mute(status.1);
                 vol_widget.imp().level_bar_revealer.set_reveal_child(true);

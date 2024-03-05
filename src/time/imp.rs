@@ -1,7 +1,7 @@
 use glib::Properties;
 use gtk::pango::AttrList;
 use gtk::subclass::prelude::*;
-use gtk::{glib, CompositeTemplate, Label, Popover};
+use gtk::{glib, CompositeTemplate, Label, MenuButton, Popover};
 
 use crate::custom_layout::CustomLayout;
 
@@ -10,8 +10,10 @@ use crate::custom_layout::CustomLayout;
 #[template(resource = "/org/gtk_rs/rusticbar/time.ui")]
 // #[properties(wrapper_type = super::TimeWidget)]
 pub struct TimeWidget {
-    #[template_child(id = "time_label")]
-    pub time_label: TemplateChild<Label>,
+    #[template_child(id = "menu_button")]
+    pub time_button: TemplateChild<MenuButton>,
+    // #[template_child(id = "time_label")]
+    // pub time_label: TemplateChild<Label>,
     #[template_child(id = "calendar_popover")]
     pub calendar_popover: TemplateChild<Popover>,
     // pub layout: Time,
@@ -43,7 +45,7 @@ impl ObjectImpl for TimeWidget {
     fn constructed(&self) {
         self.parent_constructed();
         self.obj().setup_time();
-        self.obj().setup_calendar();
+        // self.obj().setup_calendar();
     }
 }
 

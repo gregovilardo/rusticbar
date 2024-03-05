@@ -3,7 +3,7 @@ use std::cell::{Cell, RefCell};
 use glib::subclass::InitializingObject;
 use glib::Properties;
 use gtk::subclass::prelude::*;
-use gtk::{gio, ColumnView};
+use gtk::{gio, ColumnView, Revealer};
 use gtk::{glib, CompositeTemplate};
 use gtk::{prelude::*, Box};
 use gtk::{Label, ListView};

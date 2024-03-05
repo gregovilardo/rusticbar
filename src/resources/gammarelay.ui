@@ -79,6 +79,9 @@
             </child>
             <child>
               <object class="GtkSwitch" id="inverted_switch">
+                <property name="margin-top">5</property>
+                <property name="margin-end">70</property>
+                <property name="margin-start">70</property>
                 <!-- <property name="digits">0</property> -->
               </object>
             </child>

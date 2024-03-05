@@ -17,8 +17,8 @@
             <child>
               <object class="GtkLevelBar" id="vol_level_bar">
                 <property name="width-request">100</property>
-                <property name="margin-top">10</property>
-                <property name="margin-bottom">9</property>
+                <property name="margin-top">11</property>
+                <property name="margin-bottom">11</property>
                 <property name="orientation">horizontal</property>
                 <property name="max-value">100</property>
                 <property name="min-value">0</property>

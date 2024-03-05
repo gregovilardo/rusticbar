@@ -19,6 +19,7 @@ dbus = "0.9"
 swayipc = "3.0.2"
 passcod-networkmanager = "0.6.1"
 systemstat = "0.2.3"
+signal-hook = "0.3.17"
 # wayrs-client = "1.0.2"
 
 [build-dependencies]

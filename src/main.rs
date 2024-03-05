@@ -15,10 +15,14 @@ mod ws_widget;
 
 // use fixed_size_layout_manager::FixedSizeLayoutManager;
 use gtk::gdk::Display;
-use gtk::prelude::*;
+use gtk::gio::ActionEntry;
+use gtk::glib::clone;
 use gtk::{gio, glib, Application, CssProvider};
+use gtk::{prelude::*, ApplicationWindow};
 use gtk4_layer_shell as layer_shell;
 use layer_shell::LayerShell;
+use signal_hook::consts::signal::*;
+use signal_hook::iterator::Signals;
 use window::Window;
 
 const APP_ID: &str = "org.gtk_rs.RusticBar";
@@ -32,7 +36,7 @@ fn main() -> glib::ExitCode {
     let app = Application::builder().application_id(APP_ID).build();
 
     // Connect to signals
-    app.connect_startup(|_app| {
+    app.connect_startup(|app| {
         load_css();
     });
 
@@ -48,10 +52,15 @@ fn load_css() {
     provider.load_from_resource("/org/gtk_rs/rusticbar/style.css");
 
     // Add the provider to the default screen
+    // gtk::style_context_remove_provider_for_display(
+    //     &Display::default().expect("Could not connect to a display."),
+    //     &CssProvider::default(),
+    // );
+    // gtk::add_prog
     gtk::style_context_add_provider_for_display(
         &Display::default().expect("Could not connect to a display."),
         &provider,
-        gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+        gtk::STYLE_PROVIDER_PRIORITY_USER,
     );
 }
 
@@ -64,5 +73,30 @@ fn build_ui(app: &Application) {
     window.set_anchor(layer_shell::Edge::Left, true);
     window.set_anchor(layer_shell::Edge::Right, true);
     window.auto_exclusive_zone_enable();
+
+    let (send, recv) = async_channel::unbounded();
+    let mut signals = Signals::new(&[SIGUSR1]).expect("Could not register signal handler");
+    gio::spawn_blocking(move || {
+        for signal in signals.forever() {
+            match signal {
+                SIGUSR1 => {
+                    let _res = send.send_blocking(true);
+                }
+                _ => unreachable!(),
+            }
+        }
+    });
+
+    glib::spawn_future_local(clone!(@weak window as window => async move {
+        while let Ok(_res) = recv.recv().await {
+            if window.get_visible() {
+                window.set_visible(false);
+            } else {
+                window.set_visible(true);
+
+            }
+        }
+    }));
+
     window.present();
 }

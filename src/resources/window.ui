@@ -2,7 +2,7 @@
 <interface>
 
   <template class="MyGtkAppWindow" parent="GtkApplicationWindow">
-    <!-- <property name="css-classes">[transparent-background]</property> -->
+    <property name="css-classes">transparent-background</property>
     <property name="decorated">false</property>
     <property name="resizable">false</property>
     <property name="hexpand">true</property>
@@ -16,6 +16,7 @@
     <property name="title" translatable="yes">rusticbar</property>
     <child>
       <object class="GtkBox">
+        <property name="css-classes">unblur</property>
         <property name="name">father_box</property>
         <property name="margin-start">20</property>
         <property name="margin-end">20</property>
@@ -23,11 +24,19 @@
         <child>
           <object class="GtkListView" id="wss_list">
             <property name="orientation">horizontal</property>
+            <style>
+              <class name="no-background" />
+            </style>
           </object>
         </child>
         <child>
           <object class="GtkSeparator">
             <property name="hexpand">true</property>
+            <property name="name">separator1</property>
+            <style>
+              <class name="no-background" />
+            </style>
+            <!-- <property name="css-classes">no-background</property> -->
           </object>
         </child>
       </object>

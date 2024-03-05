@@ -4,8 +4,13 @@ use glib::{clone, Object};
 use gtk::gdk::{Display, Monitor};
 use gtk::prelude::DisplayExt;
 use gtk::subclass::prelude::ObjectSubclassIsExt;
-use gtk::{gio, glib, Application, Box, ListItem, NoSelection, SignalListItemFactory};
+use gtk::{
+    gio, glib, Application, Box, ListItem, NoSelection, RevealerTransitionType,
+    SignalListItemFactory,
+};
 use gtk::{prelude::*, Separator};
+use signal_hook::consts::signal::*;
+use signal_hook::iterator::Signals;
 
 use crate::ws_object::WsObject;
 use crate::ws_widget::WsWidget;
@@ -51,6 +56,7 @@ impl Window {
             .insert_before(&gtk_box, Some(&self.imp().wss_list.get()));
         let separator_hexpanded = &Separator::new(gtk::Orientation::Horizontal);
         separator_hexpanded.set_hexpand(true);
+        separator_hexpanded.add_css_class("no-background");
         // let separator = &Separator::new(gtk::Orientation::Horizontal);
         gtk_box.append(&self.imp().focused_app_widget);
         gtk_box.append(separator_hexpanded);
@@ -101,7 +107,7 @@ impl Window {
     }
 
     fn focus_workspace(&self, num: i32, focus_status: bool, name: String) {
-        println!("{:?}", (num, name.clone()));
+        // println!("{:?}", (num, name.clone()));
         let workspaces = self.workspaces();
         let mut position = 0;
         while let Some(item) = workspaces.item(position) {
@@ -232,9 +238,9 @@ impl Window {
 
         glib::spawn_future_local(clone! (@weak self as window => async move {
                     while let Ok(ev) = receiver.recv().await {
+                                // println!("{:#?}", ev);
                         match ev {
                             Ok(swayipc::Event::Workspace(ev)) => {
-                                println!("{:#?}", ev);
                                 match ev.change {
                                     swayipc::WorkspaceChange::Init => {
                                         if let Some(current_node)  = ev.current {
