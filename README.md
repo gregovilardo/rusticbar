@@ -30,7 +30,9 @@ sudo apt install libdbus-1-dev
 sudo apt install pkg-config
 ```
 
-Additionally, you'll need to install **wl-gammarelay-rs**. Follow the instructions provided by the project to install it.
+**gtk4-layer-shell** installation instructions on its [GitHub page](https://github.com/wmww/gtk4-layer-shell). (This is a must)
 
-You can find **gtk4-layer-shell** installation instructions on its [GitHub page](https://github.com/wmww/gtk4-layer-shell).
+**wl-gammarelay-rs**. installation instructions on its [GitHub page](https://github.com/MaxVerevkin/wl-gammarelay-rs). (Not necessary)
+
+
 
