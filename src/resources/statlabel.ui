@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="StatLabelBox" parent="GtkBox">
+    <property name="homogeneous">true</property>
+    <child>
+      <object class="GtkLabel" id="description">
+        <property name="label"></property>
+        <property name="halign">start</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="halign">end</property>
+        <property name="spacing">5</property>
+        <child>
+          <object class="GtkLabel" id="data">
+            <property name="label"></property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="unit">
+            <property name="label"></property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

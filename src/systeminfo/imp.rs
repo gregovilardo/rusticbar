@@ -1,40 +1,28 @@
 use std::cell::Cell;
 
 use crate::custom_layout::CustomLayout;
+use gtk::pango::AttrList;
 use gtk::subclass::prelude::*;
+use gtk::{prelude::*, Box};
 // use gtk::MenuButton;
 use gtk::Popover;
 use gtk::{glib, CompositeTemplate, Label};
+
+use super::statlabel::StatLabel;
 
 // Object holding the state
 #[derive(Default, CompositeTemplate)]
 #[template(resource = "/org/gtk_rs/rusticbar/systeminfo.ui")]
 pub struct SystemInfoWidget {
-    // pub disk: Label,
-    #[template_child(id = "disk")]
-    pub disk: TemplateChild<Label>,
-    #[template_child(id = "disk_data")]
-    pub disk_data: TemplateChild<Label>,
-    #[template_child(id = "ram")]
-    pub ram: TemplateChild<Label>,
-    #[template_child(id = "ram_data")]
-    pub ram_data: TemplateChild<Label>,
-    #[template_child(id = "cpu_load")]
-    pub cpu_load: TemplateChild<Label>,
-    #[template_child(id = "cpu_load_data")]
-    pub cpu_load_data: TemplateChild<Label>,
-    #[template_child(id = "cpu_temp")]
-    pub cpu_temp: TemplateChild<Label>,
-    #[template_child(id = "cpu_temp_data")]
-    pub cpu_temp_data: TemplateChild<Label>,
-    #[template_child(id = "uptime")]
-    pub uptime: TemplateChild<Label>,
-    #[template_child(id = "uptime_data")]
-    pub uptime_data: TemplateChild<Label>,
+    pub disk: StatLabel,
+    pub ram: StatLabel,
+    pub cpu_load: StatLabel,
+    pub cpu_temp: StatLabel,
+    pub uptime: StatLabel,
+    #[template_child(id = "stat_box")]
+    pub stat_box: TemplateChild<Box>,
     #[template_child(id = "stat_popover")]
     pub popover: TemplateChild<Popover>,
-    // #[template_child(id = "menu_button")]
-    // pub button: TemplateChild<MenuButton>,
     pub ticking: Cell<bool>,
 }
 
@@ -63,8 +51,35 @@ impl SystemInfoWidget {}
 impl ObjectImpl for SystemInfoWidget {
     fn constructed(&self) {
         self.parent_constructed();
+        self.obj().setup_box();
         self.obj().call_and_set_systemstat();
         self.obj().setup_popover();
+        self.ram
+            .bind_property("data", &self.ram.imp().data_label.get(), "name")
+            .sync_create()
+            .transform_to(|_, data: f64| {
+                let mut widget_name = "stat_normal".to_string();
+                if data > 7.0 {
+                    widget_name = "stat_high".to_string();
+                } else if data > 4.0 {
+                    widget_name = "stat_medium".to_string();
+                }
+                Some(widget_name.to_value())
+            })
+            .build();
+        self.cpu_load
+            .bind_property("data", &self.cpu_load.imp().data_label.get(), "name")
+            .sync_create()
+            .transform_to(|_, data: f64| {
+                let mut widget_name = "stat_normal".to_string();
+                if data > 80.0 {
+                    widget_name = "stat_high".to_string();
+                } else if data > 40.0 {
+                    widget_name = "stat_medium".to_string();
+                }
+                Some(widget_name.to_value())
+            })
+            .build();
     }
 }
 

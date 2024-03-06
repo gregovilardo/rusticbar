@@ -53,6 +53,18 @@ label#ws_focused {
   opacity: 0;
 }
 
+#stat_normal {
+  color: #99c140;
+}
+
+#stat_medium {
+  color: #e7b416;
+}
+
+#stat_high {
+  color: #cc3232;
+}
+
 /* #calendar_menu_button { */
 /*   opacity: 0; */
 /* } */

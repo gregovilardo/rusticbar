@@ -4,13 +4,8 @@ use glib::{clone, Object};
 use gtk::gdk::{Display, Monitor};
 use gtk::prelude::DisplayExt;
 use gtk::subclass::prelude::ObjectSubclassIsExt;
-use gtk::{
-    gio, glib, Application, Box, ListItem, NoSelection, RevealerTransitionType,
-    SignalListItemFactory,
-};
+use gtk::{gio, glib, Application, Box, ListItem, NoSelection, SignalListItemFactory};
 use gtk::{prelude::*, Separator};
-use signal_hook::consts::signal::*;
-use signal_hook::iterator::Signals;
 
 use crate::ws_object::WsObject;
 use crate::ws_widget::WsWidget;

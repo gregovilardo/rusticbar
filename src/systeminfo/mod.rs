@@ -1,4 +1,5 @@
 mod imp;
+mod statlabel;
 
 use glib::Object;
 use gtk::{
@@ -6,11 +7,13 @@ use gtk::{
     glib::{self, clone},
     prelude::*,
     subclass::prelude::ObjectSubclassIsExt,
-    EventControllerMotion,
+    Box, EventControllerMotion,
 };
 use std::thread;
 use std::time::Duration;
 use systemstat::{saturating_sub_bytes, Platform, System};
+
+use self::statlabel::StatLabel;
 
 glib::wrapper! {
     pub struct SystemInfoWidget(ObjectSubclass<imp::SystemInfoWidget>)
@@ -35,6 +38,25 @@ enum StatType {
 impl SystemInfoWidget {
     pub fn new() -> Self {
         Object::builder().build()
+    }
+
+    fn setup_box(&self) {
+        let widget = self.imp();
+        let stats: Vec<&StatLabel> = vec![
+            &widget.disk,
+            &widget.ram,
+            &widget.cpu_load,
+            &widget.cpu_temp,
+            &widget.uptime,
+        ];
+
+        let desc: Vec<&str> = vec!["DISC:", "RAM:", "CPU:", "CPU_TEMP:", "UPTIME:"];
+        let units: Vec<&str> = vec!["GB", "GB", "%", "Cº", ""];
+        for ((stat, description), unit) in stats.iter().zip(desc).zip(units) {
+            widget.stat_box.append(*stat);
+            stat.set_description(description);
+            stat.set_unit(unit);
+        }
     }
 
     fn setup_popover(&self) {
@@ -83,7 +105,10 @@ impl SystemInfoWidget {
 
             match sys.mount_at("/") {
                 Ok(mount) => {
-                    let _res = s.send_blocking((StatType::Disc, format!("{}", mount.avail)));
+                    let _res = s.send_blocking((
+                        StatType::Disc,
+                        (mount.avail.as_u64() as f64 / 1000_f64.powf(3.0)),
+                    ));
                 }
                 Err(x) => println!("\nMount at /: error: {}", x),
             }
@@ -91,7 +116,8 @@ impl SystemInfoWidget {
                 Ok(mem) => {
                     let _res = s.send_blocking((
                         StatType::Ram,
-                        format!("{}", saturating_sub_bytes(mem.total, mem.free)),
+                        saturating_sub_bytes(mem.total, mem.free).as_u64() as f64
+                            / 1000_f64.powf(3.0),
                     ));
                 }
                 Err(x) => println!("\nMemory: error: {}", x),
@@ -99,10 +125,7 @@ impl SystemInfoWidget {
 
             match sys.uptime() {
                 Ok(uptime) => {
-                    let _res = s.send_blocking((
-                        StatType::Uptime,
-                        format!("{}min", (uptime.as_secs() / 60) as u32),
-                    ));
+                    let _res = s.send_blocking((StatType::Uptime, (uptime.as_secs() / 60) as f64));
                 }
                 Err(x) => println!("\nUptime: error: {}", x),
             }
@@ -113,17 +136,14 @@ impl SystemInfoWidget {
                     let cpu = cpu.done().unwrap();
                     // let prom =
                     //     (cpu.user + cpu.nice + cpu.system + cpu.interrupt + cpu.idle) * 100.0 / 5.0;
-                    let _res = s.send_blocking((
-                        StatType::CpuLoad,
-                        format!("{}%.", (cpu.user * 100.0).round()),
-                    ));
+                    let _res = s.send_blocking((StatType::CpuLoad, (cpu.user * 100.0) as f64));
                 }
                 Err(x) => println!("\nCPU load: error: {}", x),
             }
 
             match sys.cpu_temp() {
                 Ok(cpu_temp) => {
-                    let _res = s.send_blocking((StatType::CpuTemp, format!("{}ºC", cpu_temp)));
+                    let _res = s.send_blocking((StatType::CpuTemp, cpu_temp as f64));
                 }
                 Err(x) => println!("\nCPU TEMP:   {}", x),
             }
@@ -134,28 +154,27 @@ impl SystemInfoWidget {
                 match res.0 {
                     StatType::Disc => {
                         widget.imp()
-                            .disk_data
-                            .set_text(&res.1);
+                            .disk.set_data(res.1);
                     },
                     StatType::Ram => {
                         widget.imp()
-                            .ram_data
-                            .set_text(&res.1);
+                            .ram
+                            .set_data(res.1);
                     },
                     StatType::CpuLoad => {
                         widget.imp()
-                            .cpu_load_data
-                            .set_text(&res.1);
+                            .cpu_load
+                            .set_data(res.1);
                     },
                     StatType::CpuTemp => {
                         widget.imp()
-                            .cpu_temp_data
-                            .set_text(&res.1);
+                            .cpu_temp
+                            .set_data(res.1);
                     },
                     StatType::Uptime => {
                         widget.imp()
-                            .uptime_data
-                            .set_text(&res.1);
+                            .uptime
+                            .set_data(res.1);
                     },
                 }
             }

@@ -36,7 +36,7 @@ fn main() -> glib::ExitCode {
     let app = Application::builder().application_id(APP_ID).build();
 
     // Connect to signals
-    app.connect_startup(|app| {
+    app.connect_startup(|_app| {
         load_css();
     });
 
@@ -51,12 +51,6 @@ fn load_css() {
     let provider = CssProvider::new();
     provider.load_from_resource("/org/gtk_rs/rusticbar/style.css");
 
-    // Add the provider to the default screen
-    // gtk::style_context_remove_provider_for_display(
-    //     &Display::default().expect("Could not connect to a display."),
-    //     &CssProvider::default(),
-    // );
-    // gtk::add_prog
     gtk::style_context_add_provider_for_display(
         &Display::default().expect("Could not connect to a display."),
         &provider,
