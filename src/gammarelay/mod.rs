@@ -1,10 +1,10 @@
 mod imp;
 use crate::gammarelay_dbus::RsWlGammarelay;
 
-use dbus::blocking::Connection;
-use glib::Object;
+use dbus::blocking::{Connection, Proxy};
+use glib::{clone, Object};
 use gtk::EventControllerMotion;
-use gtk::{glib, prelude::*, subclass::prelude::ObjectSubclassIsExt};
+use gtk::{gio, glib, prelude::*, subclass::prelude::ObjectSubclassIsExt};
 use std::process::{Child, Command};
 use std::time::Duration;
 
@@ -61,38 +61,34 @@ impl GammarelayWidget {
         let mut gammarelay = Command::new("wl-gammarelay-rs");
         gammarelay.arg("run");
         let child = gammarelay.spawn()?;
-        std::thread::sleep(Duration::from_secs(1));
         return Ok(child);
     }
 
     fn setup_gammarelay(&self) {
-        let dbus_con = Connection::new_session().expect("conn");
-        let gammarelay = dbus_con.with_proxy("rs.wl-gammarelay", "/", Duration::new(5, 0));
-        let widget = self.imp();
-        match gammarelay.temperature() {
-            Ok(temp) => widget.temp_scale.set_value(temp as f64),
-            Err(err) => {
-                eprintln!("{:#?}", err);
+        let (s, r) = async_channel::unbounded();
+        gio::spawn_blocking(move || loop {
+            if let Ok(con) = Connection::new_session() {
+                let _res = s.send_blocking(con);
+                break;
             }
-        };
-        match gammarelay.brightness() {
-            Ok(brightness) => widget.bright_scale.set_value(brightness as f64),
-            Err(err) => {
-                eprintln!("{:#?}", err);
+        });
+
+        glib::spawn_future_local(clone!(@weak self as widget => async move {
+            while let Ok(con) = r.recv().await {
+                let _res = widget.run_wl_gammastep();
+                std::thread::sleep(Duration::from_secs(5));
+                let gammarelay = con.with_proxy("rs.wl-gammarelay", "/", Duration::new(5, 0));
+                let widget = widget.imp();
+                let temp = gammarelay.temperature().unwrap();
+                widget.temp_scale.set_value(temp as f64);
+                let brightness = gammarelay.brightness().unwrap();
+                widget.bright_scale.set_value(brightness as f64);
+                let gamma = gammarelay.gamma().unwrap();
+                widget.gamma_scale.set_value(gamma as f64);
+                let is_inverted = gammarelay.inverted().unwrap();
+                widget.inverted_switch.set_active(is_inverted);
             }
-        };
-        match gammarelay.gamma() {
-            Ok(gamma) => widget.gamma_scale.set_value(gamma as f64),
-            Err(err) => {
-                eprintln!("{:#?}", err);
-            }
-        };
-        match gammarelay.inverted() {
-            Ok(is_inverted) => widget.inverted_switch.set_active(is_inverted),
-            Err(err) => {
-                eprintln!("{:#?}", err);
-            }
-        }
+        }));
     }
 
     fn setup_actions(&self) {
