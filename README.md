@@ -3,7 +3,7 @@
 This is pretty experimental, i make this proyect to learn rust and without knowing gtk so probably not the best 
 but for my use case this bar is really good and is not cpu intensive so if you want to give it a try:
 
-1. **Install Dependencies**: Ensure all dependencies listed above are installed on your system by running the commands provided.
+1. **Install Dependencies**: Ensure all dependencies are installed on your system by running the commands provided.
 
 2. **Sway Configuration**: This bar is specifically designed for Sway. Make sure you're running Sway as your compositor.
 
