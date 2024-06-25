@@ -1,3 +1,7 @@
+https://github.com/gregovilardo/rusticbar/assets/76529860/d61909ac-78c3-4b8d-8413-e829fc6621df
+
+---
+
 # Installation and Setup
 
 This is pretty experimental, i make this proyect to learn rust and without knowing gtk so probably not the best 
